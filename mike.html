@@ -16,6 +16,43 @@
             font-family: "KaiTi", "楷体", serif;
             overflow: hidden;
         }
+        /* 账号登录注册面板（最先显示） */
+        .account-box {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .acc-title {
+            font-size: 30px;
+            color: #000;
+        }
+        .acc-input {
+            width: min(300px,80vw);
+            height: 48px;
+            border: 2px solid #000;
+            padding: 0 12px;
+            font-size:17px;
+            outline:none;
+        }
+        .acc-btn {
+            width: min(300px,80vw);
+            height: 48px;
+            border:2px solid #000;
+            background:#fff;
+            font-size:17px;
+            cursor:pointer;
+            transition:0.15s;
+        }
+        .acc-btn:active {transform:scale(1.04);}
+        .acc-tip {
+            color:red;
+            font-size:17px;
+        }
+
         /* 简答题登录界面 */
         .login-box {
             width: 100%;
@@ -25,6 +62,7 @@
             align-items: center;
             justify-content: center;
             gap: 30px;
+            display:none;
         }
         .login-title {
             font-size: 32px;
@@ -80,13 +118,50 @@
             font-family: "KaiTi",楷体;
             opacity: 0;
         }
-        /* 工作室主界面（默认隐藏） */
+        /* 工作室主界面 */
         .main-page {
             display: none;
             flex-direction: column;
             align-items: center;
-            padding-top: 80px;
-            gap: 60px;
+            padding-top: 40px;
+            gap: 40px;
+            width:100%;
+        }
+        .top-bar {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            font-size:24px;
+        }
+        /* ST金币样式 高级金属光泽 无廉价画风 */
+        .st-coin {
+            width:44px;
+            height:44px;
+            border-radius:50%;
+            background: radial-gradient(circle at 30% 30%, #fff8b8, #ffd700 40%, #b8860b 80%, #805c00);
+            box-shadow: inset -6px -6px 12px rgba(90,50,0,0.5), inset 4px 4px 8px rgba(255,255,220,0.8), 0 0 10px rgba(255,200,0,0.4);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:bold;
+            color:#503800;
+            font-size:18px;
+        }
+        .sign-btn {
+            width:220px;
+            height:48px;
+            border:2px solid #000;
+            background:#fff;
+            font-size:18px;
+            cursor:pointer;
+            transition:0.15s;
+        }
+        .sign-btn:active {transform:scale(1.04);}
+        .sign-btn:disabled {
+            background:#eee;
+            color:#777;
+            cursor:not-allowed;
+            transform:none;
         }
         .main-title {
             font-size: 36px;
@@ -133,13 +208,11 @@
             85% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -120px); }
         }
-        /* 遮罩文字渐显动画 */
         @keyframes textShow {
             0% { opacity: 0; }
             50% { opacity: 1; }
             100% { opacity: 1; }
         }
-        /* 遮罩缓慢消失动画 */
         @keyframes maskFadeOut {
             from { opacity: 1; }
             to { opacity: 0; visibility: hidden; }
@@ -147,7 +220,17 @@
     </style>
 </head>
 <body>
-    <!-- 简答题登录页面 -->
+    <!-- 账号注册登录面板 第一层 -->
+    <div class="account-box" id="accountPanel">
+        <div class="acc-title">SKIBIDI工作室账号系统</div>
+        <input class="acc-input" id="userName" placeholder="输入账号名">
+        <input class="acc-input" id="userPwd" placeholder="输入密码" type="password">
+        <button class="acc-btn" id="regBtn">注册新账号</button>
+        <button class="acc-btn" id="loginBtn">登录已有账号</button>
+        <div class="acc-tip" id="accTip"></div>
+    </div>
+
+    <!-- 答题验证页面 -->
     <div class="login-box" id="loginScreen">
         <div class="login-title">SKIBIDI帝国工作室 准入验证</div>
         <div class="question-text">我们的家在哪？</div>
@@ -161,8 +244,15 @@
         <div class="mask-text">欢迎回家</div>
     </div>
 
-    <!-- 工作室主页面（初始隐藏） -->
+    <!-- 工作室主页面 -->
     <div class="main-page" id="workSpace">
+        <!-- ST币金币 + 签到区域 -->
+        <div class="top-bar">
+            <div class="st-coin">ST</div>
+            <span>ST币：<span id="stCoinNum">0</span></span>
+        </div>
+        <button class="sign-btn" id="dailySign">每日签到领取10 ST币</button>
+
         <h1 class="main-title">SKIBIDI 帝国的工作室</h1>
         <div class="btn-wrapper">
             <button class="common-btn" id="btnHelp">寻求帮助</button>
@@ -173,7 +263,20 @@
     </div>
 
     <script>
+        // 全局配置
         const correctAnswer = "郯城";
+        const signReward = 10; //每日签到10ST币
+        const nowDate = new Date().toLocaleDateString();
+
+        // DOM元素
+        //账号面板
+        const accountPanel = document.getElementById("accountPanel");
+        const userName = document.getElementById("userName");
+        const userPwd = document.getElementById("userPwd");
+        const regBtn = document.getElementById("regBtn");
+        const loginBtn = document.getElementById("loginBtn");
+        const accTip = document.getElementById("accTip");
+        //答题面板
         const loginScreen = document.getElementById("loginScreen");
         const workSpace = document.getElementById("workSpace");
         const maskLayer = document.getElementById("maskLayer");
@@ -181,17 +284,100 @@
         const answerInput = document.getElementById("answerInput");
         const submitBtn = document.getElementById("submitBtn");
         const wrongTip = document.getElementById("wrongTip");
+        //货币签到
+        const stCoinNum = document.getElementById("stCoinNum");
+        const dailySign = document.getElementById("dailySign");
         const pageUrl = window.location.href;
 
-        // 提交答案逻辑
+        //本地存档工具
+        function getAllAccounts(){
+            let data = localStorage.getItem("skibidiAccounts");
+            return data ? JSON.parse(data) : {};
+        }
+        function saveAccounts(accObj){
+            localStorage.setItem("skibidiAccounts", JSON.stringify(accObj));
+        }
+        let currentUser = null;
+
+        // 注册账号
+        regBtn.onclick = ()=>{
+            let name = userName.value.trim();
+            let pwd = userPwd.value.trim();
+            if(!name || !pwd){
+                accTip.innerText="账号和密码不能为空";
+                return;
+            }
+            let accounts = getAllAccounts();
+            if(accounts[name]){
+                accTip.innerText="该账号已存在，请直接登录";
+                return;
+            }
+            //新账号初始数据
+            accounts[name] = {
+                password:pwd,
+                stCoin:0,
+                lastSignDate:""
+            };
+            saveAccounts(accounts);
+            accTip.innerText="注册成功，请登录";
+        }
+        //登录账号
+        loginBtn.onclick = ()=>{
+            let name = userName.value.trim();
+            let pwd = userPwd.value.trim();
+            let accounts = getAllAccounts();
+            if(!accounts[name]){
+                accTip.innerText="账号不存在，请先注册";
+                return;
+            }
+            if(accounts[name].password !== pwd){
+                accTip.innerText="密码错误";
+                return;
+            }
+            currentUser = name;
+            //登录成功，切换到答题页面
+            accountPanel.style.display = "none";
+            loginScreen.style.display = "flex";
+            refreshCoinUI();
+            checkSignStatus();
+        }
+
+        //刷新金币显示
+        function refreshCoinUI(){
+            let accounts = getAllAccounts();
+            stCoinNum.innerText = accounts[currentUser].stCoin;
+        }
+        //检查签到状态（0点刷新）
+        function checkSignStatus(){
+            let accounts = getAllAccounts();
+            let userData = accounts[currentUser];
+            if(userData.lastSignDate === nowDate){
+                dailySign.disabled = true;
+                dailySign.innerText = "今日已签到，明天0点重置";
+            }else{
+                dailySign.disabled = false;
+                dailySign.innerText = "每日签到领取10 ST币";
+            }
+        }
+        //签到功能
+        dailySign.onclick = ()=>{
+            let accounts = getAllAccounts();
+            let userData = accounts[currentUser];
+            userData.stCoin += signReward;
+            userData.lastSignDate = nowDate;
+            saveAccounts(accounts);
+            refreshCoinUI();
+            checkSignStatus();
+            showFloatMsg(`签到成功，获得${signReward} ST币！`);
+        }
+
+        //答题开门逻辑
         function checkAnswer() {
             const inputVal = answerInput.value.trim();
             if (inputVal === correctAnswer) {
                 wrongTip.style.opacity = 0;
-                // 显示黑色遮罩
                 maskLayer.style.display = "flex";
                 maskText.style.animation = "textShow 1.2s forwards";
-                // 等待文字展示完成，再让黑幕慢慢消失
                 setTimeout(() => {
                     maskLayer.style.animation = "maskFadeOut 1.5s forwards";
                     loginScreen.style.display = "none";
@@ -207,7 +393,7 @@
             if (e.key === "Enter") checkAnswer();
         })
 
-        // 漂浮提示文字函数
+        //漂浮提示文字
         function showFloatMsg(text) {
             const oldTip = document.querySelector(".float-notice");
             if (oldTip) oldTip.remove();
@@ -216,8 +402,7 @@
             tipDom.textContent = text;
             document.body.appendChild(tipDom);
         }
-
-        // 功能按钮逻辑
+        //原有四个按钮功能
         document.getElementById("btnHelp").onclick = () => {
             showFloatMsg("等待审核员审核");
         }
