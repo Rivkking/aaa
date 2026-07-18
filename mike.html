@@ -16,14 +16,40 @@
             font-family: "KaiTi", "楷体", serif;
             overflow: hidden;
         }
-        /* 左上角用户名栏 */
-        .user-label {
+        /* 顶部左右布局 */
+        .top-header {
             position: fixed;
             top: 12px;
-            left: 16px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 10;
+            /* 默认隐藏货币栏 */
+        }
+        .user-label {
             font-size: 20px;
             color: #000;
-            z-index: 10;
+        }
+        .coin-bar {
+            display:none; /* 登录/答题页面隐藏，进入工作室再显示 */
+            align-items:center;
+            gap:10px;
+            font-size:20px;
+        }
+        /* ST金币样式 高级金属光泽 无廉价画风 */
+        .st-coin {
+            width:44px;
+            height:44px;
+            border-radius:50%;
+            background: radial-gradient(circle at 30% 30%, #fff8b8, #ffd700 40%, #b8860b 80%, #805c00);
+            box-shadow: inset -6px -6px 12px rgba(90,50,0,0.5), inset 4px 4px 8px rgba(255,255,220,0.8), 0 0 10px rgba(255,200,0,0.4);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:bold;
+            color:#503800;
+            font-size:18px;
         }
         /* 账号登录注册面板（最先显示） */
         .account-box {
@@ -62,7 +88,7 @@
             font-size:17px;
         }
 
-        /* 简答题登录界面 */
+        /* 简答题答题面板 */
         .login-box {
             width: 100%;
             height: 100vh;
@@ -134,57 +160,22 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            padding-top: 40px;
+            padding-top: 80px;
             gap: 40px;
             width:100%;
-        }
-        .top-bar {
-            display:flex;
-            align-items:center;
-            gap:12px;
-            font-size:24px;
-        }
-        /* ST金币样式 高级金属光泽 无廉价画风 */
-        .st-coin {
-            width:44px;
-            height:44px;
-            border-radius:50%;
-            background: radial-gradient(circle at 30% 30%, #fff8b8, #ffd700 40%, #b8860b 80%, #805c00);
-            box-shadow: inset -6px -6px 12px rgba(90,50,0,0.5), inset 4px 4px 8px rgba(255,255,220,0.8), 0 0 10px rgba(255,200,0,0.4);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:bold;
-            color:#503800;
-            font-size:18px;
-        }
-        .sign-btn {
-            width:220px;
-            height:48px;
-            border:2px solid #000;
-            background:#fff;
-            font-size:18px;
-            cursor:pointer;
-            transition:0.15s;
-        }
-        .sign-btn:active {transform:scale(1.04);}
-        .sign-btn:disabled {
-            background:#eee;
-            color:#777;
-            cursor:not-allowed;
-            transform:none;
         }
         .main-title {
             font-size: 36px;
             color: #000000;
             white-space: nowrap;
         }
-        .btn-wrapper {
+        /* 菜单栏容器 */
+        .menu-box {
             display: flex;
             flex-direction: column;
             gap: 24px;
         }
-        .common-btn {
+        .menu-btn {
             width: min(320px, 85vw);
             height: 56px;
             font-size: 19px;
@@ -195,8 +186,14 @@
             cursor: pointer;
             transition: transform 0.15s ease;
         }
-        .common-btn:active {
+        .menu-btn:active {
             transform: scale(1.05);
+        }
+        .menu-btn:disabled {
+            background:#eee;
+            color:#777;
+            cursor:not-allowed;
+            transform:none;
         }
         .disabled-btn {
             pointer-events: none;
@@ -230,8 +227,14 @@
     </style>
 </head>
 <body>
-    <!-- 左上角用户名显示 -->
-    <div class="user-label" id="userLabel"></div>
+    <!-- 顶部头部：左用户名 / 右货币（默认隐藏） -->
+    <div class="top-header">
+        <div class="user-label" id="userLabel"></div>
+        <div class="coin-bar" id="coinWrap">
+            <div class="st-coin">ST</div>
+            <span>ST币：<span id="stCoinNum">0</span></span>
+        </div>
+    </div>
 
     <!-- 账号注册登录面板 第一层 -->
     <div class="account-box" id="accountPanel">
@@ -243,7 +246,7 @@
         <div class="acc-tip" id="accTip"></div>
     </div>
 
-    <!-- 答题验证页面 -->
+    <!-- 答题验证页面（仅首次登录出现） -->
     <div class="login-box" id="loginScreen">
         <div class="login-title">SKIBIDI帝国工作室 准入验证</div>
         <div class="question-text">我们的家在哪？</div>
@@ -257,21 +260,15 @@
         <div class="mask-text" id="maskTextWrap"></div>
     </div>
 
-    <!-- 工作室主页面 -->
+    <!-- 工作室主页面 菜单栏 -->
     <div class="main-page" id="workSpace">
-        <!-- ST币金币 + 签到区域 -->
-        <div class="top-bar">
-            <div class="st-coin">ST</div>
-            <span>ST币：<span id="stCoinNum">0</span></span>
-        </div>
-        <button class="sign-btn" id="dailySign">每日签到领取10 ST币</button>
-
         <h1 class="main-title">SKIBIDI 帝国的工作室</h1>
-        <div class="btn-wrapper">
-            <button class="common-btn" id="btnHelp">寻求帮助</button>
-            <button class="common-btn" id="btnFind">寻找天保</button>
-            <button class="common-btn" id="btnLink">如何再次打开这个网站</button>
-            <button class="common-btn disabled-btn">我不是按钮</button>
+        <div class="menu-box">
+            <button class="menu-btn" id="dailySign">每日签到领取10 ST币</button>
+            <button class="menu-btn" id="btnHelp">寻求帮助</button>
+            <button class="menu-btn" id="btnFind">寻找天保</button>
+            <button class="menu-btn" id="btnLink">如何再次打开这个网站</button>
+            <button class="menu-btn disabled-btn">我不是按钮</button>
         </div>
     </div>
 
@@ -283,6 +280,9 @@
 
         // DOM元素
         const userLabel = document.getElementById("userLabel");
+        const coinWrap = document.getElementById("coinWrap");
+        const stCoinNum = document.getElementById("stCoinNum");
+        const dailySign = document.getElementById("dailySign");
         const accountPanel = document.getElementById("accountPanel");
         const userName = document.getElementById("userName");
         const userPwd = document.getElementById("userPwd");
@@ -296,8 +296,6 @@
         const answerInput = document.getElementById("answerInput");
         const submitBtn = document.getElementById("submitBtn");
         const wrongTip = document.getElementById("wrongTip");
-        const stCoinNum = document.getElementById("stCoinNum");
-        const dailySign = document.getElementById("dailySign");
         const pageUrl = window.location.href;
 
         //本地存档工具
@@ -308,7 +306,7 @@
         function saveAccounts(accObj){
             localStorage.setItem("skibidiAccounts", JSON.stringify(accObj));
         }
-        // 记住登录缓存，免重复输密码
+        // 登录缓存 + 答题一次性标记
         function setLoginCache(name){
             localStorage.setItem("skibidiLoginCache", name);
         }
@@ -318,21 +316,33 @@
         function clearLoginCache(){
             localStorage.removeItem("skibidiLoginCache");
         }
+        function setPassQuestion(name){
+            localStorage.setItem("skibidiPassQ_" + name, "1");
+        }
+        function checkUserPassQuestion(name){
+            return localStorage.getItem("skibidiPassQ_" + name) === "1";
+        }
         let currentUser = null;
 
-        // 初始化：检测是否已记住登录
+        // 初始化：自动登录判断
         function initCheckLogin(){
             let cacheName = getLoginCache();
             if(!cacheName) return;
             let allAcc = getAllAccounts();
             if(allAcc[cacheName]){
-                // 自动登录，跳过账号密码界面
                 currentUser = cacheName;
                 accountPanel.style.display = "none";
-                loginScreen.style.display = "flex";
                 userLabel.innerText = `用户名：${currentUser}`;
                 refreshCoinUI();
                 checkSignStatus();
+                // 判断是否已经答过题目
+                if(checkUserPassQuestion(currentUser)){
+                    loginScreen.style.display = "none";
+                    workSpace.style.display = "flex";
+                    coinWrap.style.display = "flex"; //进入工作室显示货币
+                }else{
+                    loginScreen.style.display = "flex";
+                }
             }
         }
         initCheckLogin();
@@ -358,7 +368,7 @@
             saveAccounts(accounts);
             accTip.innerText="注册成功，请登录";
         }
-        //登录账号，登录后缓存免重复输入密码
+        //登录账号
         loginBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -374,10 +384,16 @@
             currentUser = name;
             setLoginCache(name);
             accountPanel.style.display = "none";
-            loginScreen.style.display = "flex";
             userLabel.innerText = `用户名：${currentUser}`;
             refreshCoinUI();
             checkSignStatus();
+            // 已答题直接进主页，显示货币
+            if(checkUserPassQuestion(currentUser)){
+                workSpace.style.display = "flex";
+                coinWrap.style.display = "flex";
+            }else{
+                loginScreen.style.display = "flex";
+            }
         }
 
         //刷新金币显示
@@ -425,18 +441,20 @@
             return delay;
         }
 
-        //答题开门逻辑
+        //答题开门逻辑（仅首次账号触发一次）
         function checkAnswer() {
             const inputVal = answerInput.value.trim();
             if (inputVal === correctAnswer) {
                 wrongTip.style.opacity = 0;
                 maskLayer.style.display = "flex";
                 let totalDelay = showWelcomeText(currentUser);
-                // 文字全部显示完，黑屏淡出
+                // 标记该账号永久跳过答题
+                setPassQuestion(currentUser);
                 setTimeout(() => {
                     maskLayer.style.animation = "maskFadeOut 1.5s forwards";
                     loginScreen.style.display = "none";
                     workSpace.style.display = "flex";
+                    coinWrap.style.display = "flex"; //进入工作室显示货币栏
                 }, (totalDelay + 1.2) * 1000);
             } else {
                 wrongTip.style.opacity = 1;
@@ -457,7 +475,7 @@
             tipDom.textContent = text;
             document.body.appendChild(tipDom);
         }
-        //原有四个按钮功能
+        //功能按钮事件
         document.getElementById("btnHelp").onclick = () => {
             showFloatMsg("等待审核员审核");
         }
