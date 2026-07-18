@@ -25,19 +25,18 @@
             justify-content: space-between;
             padding: 0 16px;
             z-index: 10;
-            /* 默认隐藏货币栏 */
         }
         .user-label {
             font-size: 20px;
             color: #000;
         }
         .coin-bar {
-            display:none; /* 登录/答题页面隐藏，进入工作室再显示 */
+            display:none;
             align-items:center;
             gap:10px;
             font-size:20px;
         }
-        /* ST金币样式 高级金属光泽 无廉价画风 */
+        /* ST金币样式 */
         .st-coin {
             width:44px;
             height:44px;
@@ -51,7 +50,7 @@
             color:#503800;
             font-size:18px;
         }
-        /* 账号登录注册面板（最先显示） */
+        /* 登录注册面板 */
         .account-box {
             width: 100%;
             height: 100vh;
@@ -87,8 +86,7 @@
             color:red;
             font-size:17px;
         }
-
-        /* 简答题答题面板 */
+        /* 答题面板 */
         .login-box {
             width: 100%;
             height: 100vh;
@@ -134,7 +132,7 @@
             font-size: 18px;
             opacity: 0;
         }
-        /* 黑屏过渡遮罩层 */
+        /* 黑屏遮罩（每次进入必播放） */
         .blackMask {
             position: fixed;
             top: 0;
@@ -155,7 +153,7 @@
         .char {
             opacity: 0;
         }
-        /* 工作室主界面 */
+        /* 工作室主页 */
         .main-page {
             display: none;
             flex-direction: column;
@@ -169,7 +167,6 @@
             color: #000000;
             white-space: nowrap;
         }
-        /* 菜单栏容器 */
         .menu-box {
             display: flex;
             flex-direction: column;
@@ -222,12 +219,11 @@
         }
         @keyframes maskFadeOut {
             from { opacity: 1; }
-            to { opacity: 0; visibility: hidden; }
+            to { opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <!-- 顶部头部：左用户名 / 右货币（默认隐藏） -->
     <div class="top-header">
         <div class="user-label" id="userLabel"></div>
         <div class="coin-bar" id="coinWrap">
@@ -236,7 +232,6 @@
         </div>
     </div>
 
-    <!-- 账号注册登录面板 第一层 -->
     <div class="account-box" id="accountPanel">
         <div class="acc-title">SKIBIDI工作室账号系统</div>
         <input class="acc-input" id="userName" placeholder="输入账号名">
@@ -246,7 +241,6 @@
         <div class="acc-tip" id="accTip"></div>
     </div>
 
-    <!-- 答题验证页面（仅首次登录出现） -->
     <div class="login-box" id="loginScreen">
         <div class="login-title">SKIBIDI帝国工作室 准入验证</div>
         <div class="question-text">我们的家在哪？</div>
@@ -255,12 +249,10 @@
         <div class="error-tip" id="wrongTip">答案错误，无法进入，请重新输入</div>
     </div>
 
-    <!-- 黑屏过渡遮罩 -->
     <div class="blackMask" id="maskLayer">
         <div class="mask-text" id="maskTextWrap"></div>
     </div>
 
-    <!-- 工作室主页面 菜单栏 -->
     <div class="main-page" id="workSpace">
         <h1 class="main-title">SKIBIDI 帝国的工作室</h1>
         <div class="menu-box">
@@ -273,12 +265,10 @@
     </div>
 
     <script>
-        // 全局配置
         const correctAnswer = "郯城";
         const signReward = 10;
         const nowDate = new Date().toLocaleDateString();
 
-        // DOM元素
         const userLabel = document.getElementById("userLabel");
         const coinWrap = document.getElementById("coinWrap");
         const stCoinNum = document.getElementById("stCoinNum");
@@ -298,7 +288,6 @@
         const wrongTip = document.getElementById("wrongTip");
         const pageUrl = window.location.href;
 
-        //本地存档工具
         function getAllAccounts(){
             let data = localStorage.getItem("skibidiAccounts");
             return data ? JSON.parse(data) : {};
@@ -306,15 +295,11 @@
         function saveAccounts(accObj){
             localStorage.setItem("skibidiAccounts", JSON.stringify(accObj));
         }
-        // 登录缓存 + 答题一次性标记
         function setLoginCache(name){
             localStorage.setItem("skibidiLoginCache", name);
         }
         function getLoginCache(){
             return localStorage.getItem("skibidiLoginCache");
-        }
-        function clearLoginCache(){
-            localStorage.removeItem("skibidiLoginCache");
         }
         function setPassQuestion(name){
             localStorage.setItem("skibidiPassQ_" + name, "1");
@@ -324,7 +309,42 @@
         }
         let currentUser = null;
 
-        // 初始化：自动登录判断
+        // 【修复】标准化动画函数，监听动画结束事件，无嵌套定时器卡死
+        function playWelcomeAnimation(username) {
+            // 重置遮罩状态
+            maskLayer.style.display = "flex";
+            maskLayer.style.opacity = "1";
+            maskLayer.style.animation = "none";
+            maskTextWrap.innerHTML = "";
+            let text = `欢迎回家，${username}`;
+            let delay = 0;
+            for(let char of text){
+                let span = document.createElement("span");
+                span.className = "char";
+                span.innerText = char;
+                span.style.animation = `charShow 0.35s ${delay}s forwards`;
+                maskTextWrap.appendChild(span);
+                delay += 0.35;
+            }
+            // 文字全部播放完，启动淡出动画
+            const totalTextTime = (delay + 1.2) * 1000;
+            setTimeout(()=>{
+                maskLayer.style.animation = "maskFadeOut 1.5s forwards";
+                // 监听淡出动画结束，强制显示工作室+货币
+                maskLayer.addEventListener("animationend", function endMask(){
+                    maskLayer.removeEventListener("animationend", endMask);
+                    maskLayer.style.display = "none";
+                    loginScreen.style.display = "none";
+                    workSpace.style.display = "flex";
+                    coinWrap.style.display = "flex";
+                    // 强制页面重绘，彻底解决渲染卡住
+                    workSpace.offsetHeight;
+                    coinWrap.offsetHeight;
+                })
+            }, totalTextTime);
+        }
+
+        // 初始化自动登录
         function initCheckLogin(){
             let cacheName = getLoginCache();
             if(!cacheName) return;
@@ -335,11 +355,9 @@
                 userLabel.innerText = `用户名：${currentUser}`;
                 refreshCoinUI();
                 checkSignStatus();
-                // 判断是否已经答过题目
                 if(checkUserPassQuestion(currentUser)){
-                    loginScreen.style.display = "none";
-                    workSpace.style.display = "flex";
-                    coinWrap.style.display = "flex"; //进入工作室显示货币
+                    // 老用户直接播放动画，正常进主页
+                    playWelcomeAnimation(currentUser);
                 }else{
                     loginScreen.style.display = "flex";
                 }
@@ -347,7 +365,7 @@
         }
         initCheckLogin();
 
-        // 注册账号
+        // 注册
         regBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -368,7 +386,8 @@
             saveAccounts(accounts);
             accTip.innerText="注册成功，请登录";
         }
-        //登录账号
+
+        // 登录按钮
         loginBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -387,21 +406,17 @@
             userLabel.innerText = `用户名：${currentUser}`;
             refreshCoinUI();
             checkSignStatus();
-            // 已答题直接进主页，显示货币
             if(checkUserPassQuestion(currentUser)){
-                workSpace.style.display = "flex";
-                coinWrap.style.display = "flex";
+                playWelcomeAnimation(currentUser);
             }else{
                 loginScreen.style.display = "flex";
             }
         }
 
-        //刷新金币显示
         function refreshCoinUI(){
             let accounts = getAllAccounts();
             stCoinNum.innerText = accounts[currentUser].stCoin;
         }
-        //检查签到状态
         function checkSignStatus(){
             let accounts = getAllAccounts();
             let userData = accounts[currentUser];
@@ -413,7 +428,6 @@
                 dailySign.innerText = "每日签到领取10 ST币";
             }
         }
-        //签到功能
         dailySign.onclick = ()=>{
             let accounts = getAllAccounts();
             let userData = accounts[currentUser];
@@ -425,37 +439,14 @@
             showFloatMsg(`签到成功，获得${signReward} ST币！`);
         }
 
-        //逐字弹出欢迎文字动画
-        function showWelcomeText(username){
-            maskTextWrap.innerHTML = "";
-            let text = `欢迎回家，${username}`;
-            let delay = 0;
-            for(let char of text){
-                let span = document.createElement("span");
-                span.className = "char";
-                span.innerText = char;
-                span.style.animation = `charShow 0.35s ${delay}s forwards`;
-                maskTextWrap.appendChild(span);
-                delay += 0.35;
-            }
-            return delay;
-        }
-
-        //答题开门逻辑（仅首次账号触发一次）
+        // 答题提交（核心修复点：答对后稳定执行动画+进入工作室）
         function checkAnswer() {
             const inputVal = answerInput.value.trim();
             if (inputVal === correctAnswer) {
                 wrongTip.style.opacity = 0;
-                maskLayer.style.display = "flex";
-                let totalDelay = showWelcomeText(currentUser);
-                // 标记该账号永久跳过答题
                 setPassQuestion(currentUser);
-                setTimeout(() => {
-                    maskLayer.style.animation = "maskFadeOut 1.5s forwards";
-                    loginScreen.style.display = "none";
-                    workSpace.style.display = "flex";
-                    coinWrap.style.display = "flex"; //进入工作室显示货币栏
-                }, (totalDelay + 1.2) * 1000);
+                loginScreen.style.display = "none";
+                playWelcomeAnimation(currentUser);
             } else {
                 wrongTip.style.opacity = 1;
                 answerInput.value = "";
@@ -466,7 +457,6 @@
             if (e.key === "Enter") checkAnswer();
         })
 
-        //漂浮提示文字
         function showFloatMsg(text) {
             const oldTip = document.querySelector(".float-notice");
             if (oldTip) oldTip.remove();
@@ -475,7 +465,6 @@
             tipDom.textContent = text;
             document.body.appendChild(tipDom);
         }
-        //功能按钮事件
         document.getElementById("btnHelp").onclick = () => {
             showFloatMsg("等待审核员审核");
         }
