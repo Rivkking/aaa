@@ -221,6 +221,98 @@
             from { opacity: 1; }
             to { opacity: 0; }
         }
+
+        /* ========== 新增：反馈弹窗样式 ========== */
+        .feedback-modal {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.6);
+            z-index: 9998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .feedback-box {
+            width: min(340px,90vw);
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            gap:16px;
+        }
+        .feedback-title {
+            font-size:22px;
+            text-align:center;
+        }
+        #feedbackInput {
+            height: 120px;
+            border:2px solid #000;
+            padding:10px;
+            font-size:17px;
+            outline:none;
+        }
+        .feedback-buttons {
+            display:flex;
+            gap:12px;
+        }
+        .feed-btn {
+            flex:1;
+            height:46px;
+            border:2px solid #000;
+            background:#fff;
+            font-size:17px;
+            cursor:pointer;
+        }
+
+        /* ========== 新增：猜数字游戏页面 渐变背景 ========== */
+        .guess-game-page {
+            width:100%;
+            height:100vh;
+            display:none;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:22px;
+            background: linear-gradient(135deg,#74ebd5,#ACB6E5);
+            padding-top:70px;
+        }
+        .game-title {
+            font-size:34px;
+        }
+        .game-range {
+            font-size:22px;
+        }
+        .game-record {
+            width: min(320px,85vw);
+            height:160px;
+            background:#fff;
+            border:2px solid #000;
+            padding:10px;
+            overflow-y:auto;
+            font-size:16px;
+        }
+        #guessInput {
+            width: min(300px,80vw);
+            height:50px;
+            border:2px solid #000;
+            padding:0 14px;
+            font-size:18px;
+            outline:none;
+        }
+        .game-buttons {
+            display:flex;
+            gap:14px;
+        }
+        .game-btn {
+            width:130px;
+            height:48px;
+            border:2px solid #000;
+            background:#fff;
+            font-size:17px;
+            cursor:pointer;
+        }
     </style>
 </head>
 <body>
@@ -258,9 +350,33 @@
         <div class="menu-box">
             <button class="menu-btn" id="dailySign">每日签到领取10 ST币</button>
             <button class="menu-btn" id="btnHelp">寻求帮助</button>
-            <button class="menu-btn" id="btnFind">寻找天保</button>
+            <button class="menu-btn" id="btnGuessGame">猜数字小游戏</button>
             <button class="menu-btn" id="btnLink">如何再次打开这个网站</button>
             <button class="menu-btn disabled-btn">我不是按钮</button>
+        </div>
+    </div>
+
+    <!-- 新增：反馈弹窗 -->
+    <div class="feedback-modal" id="feedModal">
+        <div class="feedback-box">
+            <div class="feedback-title">提交反馈</div>
+            <textarea id="feedbackInput" placeholder="写下你的建议、问题..."></textarea>
+            <div class="feedback-buttons">
+                <button class="feed-btn" id="feedCancel">取消</button>
+                <button class="feed-btn" id="feedSubmit">提交反馈</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增：猜数字游戏页面 -->
+    <div class="guess-game-page" id="gamePage">
+        <h2 class="game-title">猜数字 1~100</h2>
+        <div class="game-range" id="rangeText">当前范围：1 ~ 100</div>
+        <div class="game-record" id="recordBox">猜测记录：</div>
+        <input type="number" id="guessInput" placeholder="输入你猜的数字">
+        <div class="game-buttons">
+            <button class="game-btn" id="submitGuess">提交猜测</button>
+            <button class="game-btn" id="backHome">返回主页</button>
         </div>
     </div>
 
@@ -288,6 +404,28 @@
         const wrongTip = document.getElementById("wrongTip");
         const pageUrl = window.location.href;
 
+        // 反馈弹窗元素
+        const btnHelp = document.getElementById("btnHelp");
+        const feedModal = document.getElementById("feedModal");
+        const feedbackInput = document.getElementById("feedbackInput");
+        const feedCancel = document.getElementById("feedCancel");
+        const feedSubmit = document.getElementById("feedSubmit");
+
+        // 猜数字游戏元素
+        const btnGuessGame = document.getElementById("btnGuessGame");
+        const gamePage = document.getElementById("gamePage");
+        const rangeText = document.getElementById("rangeText");
+        const recordBox = document.getElementById("recordBox");
+        const guessInput = document.getElementById("guessInput");
+        const submitGuess = document.getElementById("submitGuess");
+        const backHome = document.getElementById("backHome");
+
+        let currentUser = null;
+        // 猜数字全局变量
+        let targetNum = 0;
+        let minRange = 1;
+        let maxRange = 100;
+
         function getAllAccounts(){
             let data = localStorage.getItem("skibidiAccounts");
             return data ? JSON.parse(data) : {};
@@ -307,11 +445,9 @@
         function checkUserPassQuestion(name){
             return localStorage.getItem("skibidiPassQ_" + name) === "1";
         }
-        let currentUser = null;
 
-        // 【修复】标准化动画函数，监听动画结束事件，无嵌套定时器卡死
+        // 欢迎开幕动画
         function playWelcomeAnimation(username) {
-            // 重置遮罩状态
             maskLayer.style.display = "flex";
             maskLayer.style.opacity = "1";
             maskLayer.style.animation = "none";
@@ -326,18 +462,15 @@
                 maskTextWrap.appendChild(span);
                 delay += 0.35;
             }
-            // 文字全部播放完，启动淡出动画
             const totalTextTime = (delay + 1.2) * 1000;
             setTimeout(()=>{
                 maskLayer.style.animation = "maskFadeOut 1.5s forwards";
-                // 监听淡出动画结束，强制显示工作室+货币
                 maskLayer.addEventListener("animationend", function endMask(){
                     maskLayer.removeEventListener("animationend", endMask);
                     maskLayer.style.display = "none";
                     loginScreen.style.display = "none";
                     workSpace.style.display = "flex";
                     coinWrap.style.display = "flex";
-                    // 强制页面重绘，彻底解决渲染卡住
                     workSpace.offsetHeight;
                     coinWrap.offsetHeight;
                 })
@@ -356,7 +489,6 @@
                 refreshCoinUI();
                 checkSignStatus();
                 if(checkUserPassQuestion(currentUser)){
-                    // 老用户直接播放动画，正常进主页
                     playWelcomeAnimation(currentUser);
                 }else{
                     loginScreen.style.display = "flex";
@@ -439,7 +571,7 @@
             showFloatMsg(`签到成功，获得${signReward} ST币！`);
         }
 
-        // 答题提交（核心修复点：答对后稳定执行动画+进入工作室）
+        // 答题校验
         function checkAnswer() {
             const inputVal = answerInput.value.trim();
             if (inputVal === correctAnswer) {
@@ -457,6 +589,7 @@
             if (e.key === "Enter") checkAnswer();
         })
 
+        // 上浮飘字提示
         function showFloatMsg(text) {
             const oldTip = document.querySelector(".float-notice");
             if (oldTip) oldTip.remove();
@@ -465,12 +598,8 @@
             tipDom.textContent = text;
             document.body.appendChild(tipDom);
         }
-        document.getElementById("btnHelp").onclick = () => {
-            showFloatMsg("等待审核员审核");
-        }
-        document.getElementById("btnFind").onclick = () => {
-            showFloatMsg("天保是永远找不来的");
-        }
+
+        // 复制链接按钮
         document.getElementById("btnLink").onclick = async () => {
             try {
                 await navigator.clipboard.writeText(pageUrl);
@@ -479,6 +608,76 @@
                 showFloatMsg(`网站链接：${pageUrl}`);
             }
         }
+
+        // ========== 1、寻求帮助反馈弹窗逻辑 ==========
+        btnHelp.onclick = ()=>{
+            feedModal.style.display = "flex";
+            feedbackInput.focus(); // 自动唤起输入键盘
+        }
+        feedCancel.onclick = ()=>{
+            feedModal.style.display = "none";
+            feedbackInput.value = "";
+        }
+        feedSubmit.onclick = ()=>{
+            feedModal.style.display = "none";
+            feedbackInput.value = "";
+            showFloatMsg("感谢您的反馈");
+        }
+
+        // ========== 2、猜数字游戏完整逻辑 ==========
+        // 打开猜数字页面，初始化游戏
+        btnGuessGame.onclick = ()=>{
+            workSpace.style.display = "none";
+            gamePage.style.display = "flex";
+            resetGame();
+        }
+        // 返回主页
+        backHome.onclick = ()=>{
+            gamePage.style.display = "none";
+            workSpace.style.display = "flex";
+        }
+        // 重置游戏，生成新数字，清空记录
+        function resetGame(){
+            targetNum = Math.floor(Math.random()*100)+1;
+            minRange = 1;
+            maxRange = 100;
+            rangeText.innerText = `当前范围：${minRange} ~ ${maxRange}`;
+            recordBox.innerHTML = "猜测记录：<br>";
+            guessInput.value = "";
+        }
+        // 提交猜测
+        function submitGuessNum(){
+            let val = Number(guessInput.value.trim());
+            if(isNaN(val) || val < minRange || val > maxRange){
+                showFloatMsg(`请输入${minRange}到${maxRange}之间有效数字`);
+                return;
+            }
+            // 写入记录
+            let recordText = "";
+            if(val < targetNum){
+                recordText = `你猜：${val}，猜小了，范围更新为${val} ~ ${maxRange}`;
+                minRange = val;
+            }else if(val > targetNum){
+                recordText = `你猜：${val}，猜大了，范围更新为${minRange} ~ ${val}`;
+                maxRange = val;
+            }else{
+                recordText = `你猜：${val}，恭喜猜对！数字就是${targetNum}`;
+            }
+            recordBox.innerHTML += recordText + "<br>";
+            rangeText.innerText = `当前范围：${minRange} ~ ${maxRange}`;
+            guessInput.value = "";
+            // 猜对自动重置
+            if(val === targetNum){
+                setTimeout(()=>{
+                    showFloatMsg("游戏通关，开启新一局");
+                    resetGame();
+                },1200);
+            }
+        }
+        submitGuess.onclick = submitGuessNum;
+        guessInput.addEventListener("keydown",e=>{
+            if(e.key === "Enter") submitGuessNum();
+        })
     </script>
 </body>
 </html>
