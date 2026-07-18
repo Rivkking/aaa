@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 手机平板自适应适配 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SKIBIDI 帝国的工作室</title>
     <style>
@@ -13,34 +12,71 @@
         }
         body {
             min-height: 100vh;
-            background: #ffffff; /* 纯白背景 */
+            background: #ffffff;
+            font-family: "KaiTi", "楷体", serif;
+        }
+        /* 密码登录界面 */
+        .login-box {
+            width: 100%;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+        .login-title {
+            font-size: 32px;
+            color: #000;
+        }
+        #pwdInput {
+            width: min(300px, 80vw);
+            height: 52px;
+            font-size: 18px;
+            border: 2px solid black;
+            padding: 0 15px;
+            outline: none;
+        }
+        #enterBtn {
+            width: min(300px, 80vw);
+            height: 52px;
+            font-size: 18px;
+            border: 2px solid #000;
+            background: #fff;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        #enterBtn:active {
+            transform: scale(1.05);
+        }
+        .error-tip {
+            color: red;
+            font-size: 18px;
+            opacity: 0;
+        }
+        /* 工作室主界面（默认隐藏，密码正确才显示） */
+        .main-page {
+            display: none;
             flex-direction: column;
             align-items: center;
             padding-top: 80px;
             gap: 60px;
         }
-        /* 标题：楷体黑色，缩小字号，移动端单行不换行 */
         .main-title {
-            font-family: "KaiTi", "楷体", serif;
             font-size: 36px;
             color: #000000;
             white-space: nowrap;
-            overflow: visible;
-            text-align: center;
         }
-        /* 按钮容器垂直均匀排布 */
         .btn-wrapper {
             display: flex;
             flex-direction: column;
             gap: 24px;
         }
-        /* 全部按钮统一样式：白底黑边黑字，高对比 */
         .common-btn {
             width: min(320px, 85vw);
             height: 56px;
             font-size: 19px;
-            font-family: "KaiTi", "楷体", serif;
             border: 2px solid #000;
             border-radius: 12px;
             background: #fff;
@@ -48,22 +84,18 @@
             cursor: pointer;
             transition: transform 0.15s ease;
         }
-        /* 点击放大效果 */
         .common-btn:active {
             transform: scale(1.05);
         }
-        /* 第四个按钮外观完全一致，仅点击失效 */
         .disabled-btn {
             pointer-events: none;
         }
-        /* 漂浮提示文字：缩小字号，黑色，适配屏幕不遮挡画面 */
         .float-notice {
             position: fixed;
             left: 50%;
             top: 42%;
             transform: translateX(-50%);
-            font-family: "KaiTi", "楷体", serif;
-            font-size: 20px; /* 缩小飘文字号 */
+            font-size: 20px;
             color: #000000;
             white-space: nowrap;
             opacity: 0;
@@ -79,18 +111,56 @@
     </style>
 </head>
 <body>
-    <h1 class="main-title">SKIBIDI 帝国的工作室</h1>
+    <!-- 密码登录页面 -->
+    <div class="login-box" id="loginScreen">
+        <div class="login-title">请输入访问密码进入工作室</div>
+        <input type="text" id="pwdInput" placeholder="请输入密码">
+        <button id="enterBtn">确认进入</button>
+        <div class="error-tip" id="wrongTip">密码错误，无法进入工作室</div>
+    </div>
 
-    <div class="btn-wrapper">
-        <button class="common-btn" id="btnHelp">寻求帮助</button>
-        <button class="common-btn" id="btnFind">寻找天保</button>
-        <button class="common-btn" id="btnLink">如何再次打开这个网站</button>
-        <button class="common-btn disabled-btn">我不是按钮</button>
+    <!-- 工作室主页面（初始隐藏） -->
+    <div class="main-page" id="workSpace">
+        <h1 class="main-title">SKIBIDI 帝国的工作室</h1>
+        <div class="btn-wrapper">
+            <button class="common-btn" id="btnHelp">寻求帮助</button>
+            <button class="common-btn" id="btnFind">寻找天保</button>
+            <button class="common-btn" id="btnLink">如何再次打开这个网站</button>
+            <button class="common-btn disabled-btn">我不是按钮</button>
+        </div>
     </div>
 
     <script>
+        const correctPassword = "天保来了"; // 设定正确密码
+        const loginScreen = document.getElementById("loginScreen");
+        const workSpace = document.getElementById("workSpace");
+        const pwdInput = document.getElementById("pwdInput");
+        const enterBtn = document.getElementById("enterBtn");
+        const wrongTip = document.getElementById("wrongTip");
         const pageUrl = window.location.href;
 
+        // 登录验证逻辑
+        function checkPassword() {
+            const inputVal = pwdInput.value.trim();
+            if (inputVal === correctPassword) {
+                // 密码正确：隐藏登录页，显示工作室
+                loginScreen.style.display = "none";
+                workSpace.style.display = "flex";
+                wrongTip.style.opacity = 0;
+            } else {
+                // 密码错误：显示错误提示，无法进入
+                wrongTip.style.opacity = 1;
+                pwdInput.value = "";
+            }
+        }
+        // 点击按钮验证
+        enterBtn.onclick = checkPassword;
+        // 回车快捷键验证
+        pwdInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") checkPassword();
+        })
+
+        // 漂浮提示文字函数
         function showFloatMsg(text) {
             const oldTip = document.querySelector(".float-notice");
             if (oldTip) oldTip.remove();
@@ -100,14 +170,13 @@
             document.body.appendChild(tipDom);
         }
 
+        // 功能按钮逻辑
         document.getElementById("btnHelp").onclick = () => {
             showFloatMsg("等待审核员审核");
         }
-
         document.getElementById("btnFind").onclick = () => {
             showFloatMsg("天保是永远找不来的");
         }
-
         document.getElementById("btnLink").onclick = async () => {
             try {
                 await navigator.clipboard.writeText(pageUrl);
