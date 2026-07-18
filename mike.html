@@ -15,7 +15,7 @@
             background: #ffffff;
             font-family: "KaiTi", "楷体", serif;
         }
-        /* 密码登录界面 */
+        /* 登录答题界面 */
         .login-box {
             width: 100%;
             height: 100vh;
@@ -28,17 +28,20 @@
         .login-title {
             font-size: 32px;
             color: #000;
+            text-align: center;
         }
-        #pwdInput {
-            width: min(300px, 80vw);
-            height: 52px;
-            font-size: 18px;
-            border: 2px solid black;
-            padding: 0 15px;
-            outline: none;
+        .question-text {
+            font-size: 22px;
+            color: #000;
         }
-        #enterBtn {
+        .options-box {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
             width: min(300px, 80vw);
+        }
+        .option-btn {
+            width: 100%;
             height: 52px;
             font-size: 18px;
             border: 2px solid #000;
@@ -47,7 +50,7 @@
             cursor: pointer;
             transition: transform 0.15s;
         }
-        #enterBtn:active {
+        .option-btn:active {
             transform: scale(1.05);
         }
         .error-tip {
@@ -55,7 +58,7 @@
             font-size: 18px;
             opacity: 0;
         }
-        /* 工作室主界面（默认隐藏，密码正确才显示） */
+        /* 工作室主界面（默认隐藏） */
         .main-page {
             display: none;
             flex-direction: column;
@@ -111,12 +114,16 @@
     </style>
 </head>
 <body>
-    <!-- 密码登录页面 -->
+    <!-- 答题验证页面，每次打开都显示 -->
     <div class="login-box" id="loginScreen">
-        <div class="login-title">请输入访问密码进入工作室</div>
-        <input type="text" id="pwdInput" placeholder="请输入密码">
-        <button id="enterBtn">确认进入</button>
-        <div class="error-tip" id="wrongTip">密码错误，无法进入工作室</div>
+        <div class="login-title">SKIBIDI帝国工作室 准入验证</div>
+        <div class="question-text">我们的家在哪？</div>
+        <div class="options-box">
+            <button class="option-btn" data-ans="A">A 大城堡</button>
+            <button class="option-btn" data-ans="B">B 郯城</button>
+            <button class="option-btn" data-ans="C">C 台湾</button>
+        </div>
+        <div class="error-tip" id="wrongTip">答案错误，无法进入工作室，请重新选择</div>
     </div>
 
     <!-- 工作室主页面（初始隐藏） -->
@@ -131,33 +138,27 @@
     </div>
 
     <script>
-        const correctPassword = "天保来了"; // 设定正确密码
+        const correctAnswer = "B"; // 正确答案：郯城
         const loginScreen = document.getElementById("loginScreen");
         const workSpace = document.getElementById("workSpace");
-        const pwdInput = document.getElementById("pwdInput");
-        const enterBtn = document.getElementById("enterBtn");
         const wrongTip = document.getElementById("wrongTip");
+        const optionBtns = document.querySelectorAll(".option-btn");
         const pageUrl = window.location.href;
 
-        // 登录验证逻辑
-        function checkPassword() {
-            const inputVal = pwdInput.value.trim();
-            if (inputVal === correctPassword) {
-                // 密码正确：隐藏登录页，显示工作室
-                loginScreen.style.display = "none";
-                workSpace.style.display = "flex";
-                wrongTip.style.opacity = 0;
-            } else {
-                // 密码错误：显示错误提示，无法进入
-                wrongTip.style.opacity = 1;
-                pwdInput.value = "";
+        // 选择题点击验证
+        optionBtns.forEach(btn => {
+            btn.onclick = function() {
+                const selectAns = this.getAttribute("data-ans");
+                if (selectAns === correctAnswer) {
+                    // 答对显示主页面
+                    loginScreen.style.display = "none";
+                    workSpace.style.display = "flex";
+                    wrongTip.style.opacity = 0;
+                } else {
+                    // 答错提示错误
+                    wrongTip.style.opacity = 1;
+                }
             }
-        }
-        // 点击按钮验证
-        enterBtn.onclick = checkPassword;
-        // 回车快捷键验证
-        pwdInput.addEventListener("keydown", e => {
-            if (e.key === "Enter") checkPassword();
         })
 
         // 漂浮提示文字函数
