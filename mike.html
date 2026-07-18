@@ -1,135 +1,179 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>猜数字小游戏</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "微软雅黑", sans-serif;
-        }
-        body {
-            background-color: #f0f7ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .game-box {
-            background: white;
-            width: 420px;
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 4px 18px #b4d0f5;
-            text-align: center;
-        }
-        h1 {
-            color: #2b6cb0;
-            margin-bottom: 20px;
-            font-size: 26px;
-        }
-        .tip-text {
-            font-size: 18px;
-            margin: 15px 0;
-            color: #333;
-            min-height: 26px;
-        }
-        .count-text {
-            color: #666;
-            margin-bottom: 22px;
-        }
-        input {
-            width: 220px;
-            padding: 12px 15px;
-            font-size: 17px;
-            border: 2px solid #a0c8f0;
-            border-radius: 8px;
-            outline: none;
-            margin-right: 10px;
-        }
-        input:focus {
-            border-color: #2b6cb0;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            background-color: #2b6cb0;
-            color: white;
-            transition: 0.2s;
-        }
-        button:hover {
-            background-color: #1d4e8c;
-        }
-        #resetBtn {
-            margin-top: 20px;
-            background-color: #e53e3e;
-        }
-        #resetBtn:hover {
-            background-color: #c53030;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D方块建模编辑器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Consolas,monospace;}
+body{overflow:hidden;background:#121218;color:#fff;}
+/* 顶部方块样式控制栏 */
+.ui-bar{
+    position:fixed;top:0;left:0;width:100%;padding:14px 20px;
+    background:rgba(22,22,30,0.9);backdrop-filter:blur(10px);
+    display:flex;gap:12px;align-items:center;z-index:99;
+}
+/* 方块立体按钮 */
+.cube-btn{
+    width:110px;height:42px;border:none;border-radius:4px;
+    background:linear-gradient(145deg,#4880ff,#2040aa);
+    box-shadow: 0 4px 0 #102060, 0 6px 12px rgba(0,0,0,0.4);
+    color:#fff;font-weight:bold;cursor:pointer;transition:0.1s;
+}
+.cube-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #102060;}
+.btn-del{background:linear-gradient(145deg,#ff5858,#aa2222);box-shadow:0 4px 0 #601010;}
+.btn-clear{background:linear-gradient(145deg,#ffb020,#aa6600);box-shadow:0 4px 0 #603000;}
+.tip-text{margin-left:auto;font-size:13px;opacity:0.7;}
+#canvas-box{width:100vw;height:100vh;}
+</style>
+<!-- 3D库CDN -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/TransformControls.js"></script>
 </head>
 <body>
-    <div class="game-box">
-        <h1>猜数字游戏（1~100）</h1>
-        <p class="tip-text" id="tip">系统已经生成1-100之间数字，快来猜猜吧！</p>
-        <p class="count-text">猜测次数：<span id="count">0</span></p>
-        <div>
-            <input type="number" id="numInput" placeholder="输入数字" min="1" max="100">
-            <button id="submitBtn">提交猜测</button>
-        </div>
-        <button id="resetBtn">重新开局</button>
-    </div>
+<div class="ui-bar">
+    <button class="cube-btn" id="spawnCube">生成立方体</button>
+    <button class="cube-btn" id="moveMode">移动模式</button>
+    <button class="cube-btn" id="rotMode">旋转模式</button>
+    <button class="cube-btn" id="scaleMode">缩放模式</button>
+    <button class="cube-btn btn-del" id="delSelected">删除选中</button>
+    <button class="cube-btn btn-clear" id="clearAll">清空全部</button>
+    <span class="tip-text">右键拖动旋转视角 | 滚轮缩放 | 左键拖动方块坐标轴编辑</span>
+</div>
+<div id="canvas-box"></div>
 
-    <script>
-        // 生成1-100随机数字
-        let targetNum = Math.floor(Math.random() * 100) + 1;
-        let guessCount = 0;
-        const tip = document.getElementById('tip');
-        const countDom = document.getElementById('count');
-        const input = document.getElementById('numInput');
-        const submitBtn = document.getElementById('submitBtn');
-        const resetBtn = document.getElementById('resetBtn');
+<script>
+let scene, camera, renderer, orbitCtrl, transformCtrl;
+let cubeList = []; // 存储所有生成的方块
+let selectedObj = null;
+const wrap = document.getElementById("canvas-box");
 
-        // 提交猜测逻辑
-        submitBtn.onclick = function() {
-            const val = Number(input.value);
-            if (isNaN(val) || val < 1 || val > 100) {
-                tip.innerText = "请输入1到100之间有效的数字！";
-                tip.style.color = "red";
-                return;
-            }
-            guessCount++;
-            countDom.innerText = guessCount;
-            tip.style.color = "#333";
+// 初始化3D场景
+function init(){
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111118);
+    scene.fog = new THREE.Fog(0x111118, 20, 60);
 
-            if (val > targetNum) {
-                tip.innerText = "猜大啦！试试更小的数字";
-            } else if (val < targetNum) {
-                tip.innerText = "猜小啦！试试更大的数字";
-            } else {
-                tip.innerText = `恭喜你猜对啦！答案就是${targetNum}，一共猜了${guessCount}次！`;
-                tip.style.color = "#229954";
-                submitBtn.disabled = true; // 猜对后禁止继续提交
-            }
-            input.value = "";
-        }
+    // 相机
+    camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera.position.set(12,9,14);
 
-        // 重新开局
-        resetBtn.onclick = function() {
-            targetNum = Math.floor(Math.random() * 100) + 1;
-            guessCount = 0;
-            countDom.innerText = 0;
-            tip.innerText = "系统已经生成1-100之间数字，快来猜猜吧！";
-            tip.style.color = "#333";
-            submitBtn.disabled = false;
-            input.value = "";
-        }
-    </script>
+    // 渲染器抗锯齿
+    renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(devicePixelRatio);
+    wrap.appendChild(renderer.domElement);
+
+    // 全局视角控制器
+    orbitCtrl = new THREE.OrbitControls(camera, renderer.domElement);
+    orbitCtrl.enableDamping = true;
+    orbitCtrl.dampingFactor = 0.06;
+
+    // 物体变换控制器（移/旋/缩核心）
+    transformCtrl = new THREE.TransformControls(camera, renderer.domElement);
+    scene.add(transformCtrl);
+    // 切换控制器时临时锁定轨道，避免冲突
+    transformCtrl.addEventListener('mouseDown',()=>orbitCtrl.enabled=false);
+    transformCtrl.addEventListener('mouseUp',()=>orbitCtrl.enabled=true);
+
+    // 光照
+    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+    scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight.position.set(16,22,16);
+    scene.add(dirLight);
+
+    // 【密集网格地面】建模软件标准细密方格
+    const gridFloor = new THREE.GridHelper(60, 120, 0x3a3a50, 0x222230);
+    scene.add(gridFloor);
+
+    // 窗口自适应
+    window.addEventListener('resize', resizeWindow);
+}
+
+// 窗口适配
+function resizeWindow(){
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+}
+
+// 生成正方体
+function spawnNewCube(){
+    const geo = new THREE.BoxGeometry(2,2,2);
+    const mat = new THREE.MeshStandardMaterial({color:0x42a8ff,metalness:0.25,roughness:0.55});
+    const cube = new THREE.Mesh(geo, mat);
+    // 随机偏移，防止方块重叠
+    cube.position.set(
+        (Math.random()-0.5)*10,
+        1,
+        (Math.random()-0.5)*10
+    );
+    scene.add(cube);
+    cubeList.push(cube);
+    selectCube(cube); // 生成后自动选中新方块
+}
+
+// 选中指定方块
+function selectCube(mesh){
+    selectedObj = mesh;
+    transformCtrl.attach(mesh);
+}
+
+// 删除单个选中方块
+function deleteSelectedCube(){
+    if(!selectedObj) return alert("请先选中一个立方体");
+    transformCtrl.detach();
+    scene.remove(selectedObj);
+    // 释放显存
+    selectedObj.geometry.dispose();
+    selectedObj.material.dispose();
+    cubeList = cubeList.filter(item=>item !== selectedObj);
+    selectedObj = null;
+}
+
+// 清空场景所有方块
+function clearAllCube(){
+    transformCtrl.detach();
+    cubeList.forEach(item=>{
+        scene.remove(item);
+        item.geometry.dispose();
+        item.material.dispose();
+    });
+    cubeList = [];
+    selectedObj = null;
+}
+
+// 切换操作模式
+document.getElementById("moveMode").onclick = ()=>{
+    if(!selectedObj) return alert("先生成/选中方块");
+    transformCtrl.setMode("translate");
+};
+document.getElementById("rotMode").onclick = ()=>{
+    if(!selectedObj) return alert("先生成/选中方块");
+    transformCtrl.setMode("rotate");
+};
+document.getElementById("scaleMode").onclick = ()=>{
+    if(!selectedObj) return alert("先生成/选中方块");
+    transformCtrl.setMode("scale");
+};
+
+// 按钮绑定事件
+document.getElementById("spawnCube").onclick = spawnNewCube;
+document.getElementById("delSelected").onclick = deleteSelectedCube;
+document.getElementById("clearAll").onclick = clearAllCube;
+
+// 渲染循环
+function renderLoop(){
+    requestAnimationFrame(renderLoop);
+    orbitCtrl.update();
+    renderer.render(scene, camera);
+}
+
+// 启动程序
+init();
+renderLoop();
+</script>
 </body>
 </html>
