@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>猜数字小游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+        body {
+            background-color: #f0f7ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-box {
+            background: white;
+            width: 420px;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px #b4d0f5;
+            text-align: center;
+        }
+        h1 {
+            color: #2b6cb0;
+            margin-bottom: 20px;
+            font-size: 26px;
+        }
+        .tip-text {
+            font-size: 18px;
+            margin: 15px 0;
+            color: #333;
+            min-height: 26px;
+        }
+        .count-text {
+            color: #666;
+            margin-bottom: 22px;
+        }
+        input {
+            width: 220px;
+            padding: 12px 15px;
+            font-size: 17px;
+            border: 2px solid #a0c8f0;
+            border-radius: 8px;
+            outline: none;
+            margin-right: 10px;
+        }
+        input:focus {
+            border-color: #2b6cb0;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #2b6cb0;
+            color: white;
+            transition: 0.2s;
+        }
+        button:hover {
+            background-color: #1d4e8c;
+        }
+        #resetBtn {
+            margin-top: 20px;
+            background-color: #e53e3e;
+        }
+        #resetBtn:hover {
+            background-color: #c53030;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-box">
+        <h1>猜数字游戏（1~100）</h1>
+        <p class="tip-text" id="tip">系统已经生成1-100之间数字，快来猜猜吧！</p>
+        <p class="count-text">猜测次数：<span id="count">0</span></p>
+        <div>
+            <input type="number" id="numInput" placeholder="输入数字" min="1" max="100">
+            <button id="submitBtn">提交猜测</button>
+        </div>
+        <button id="resetBtn">重新开局</button>
+    </div>
+
+    <script>
+        // 生成1-100随机数字
+        let targetNum = Math.floor(Math.random() * 100) + 1;
+        let guessCount = 0;
+        const tip = document.getElementById('tip');
+        const countDom = document.getElementById('count');
+        const input = document.getElementById('numInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // 提交猜测逻辑
+        submitBtn.onclick = function() {
+            const val = Number(input.value);
+            if (isNaN(val) || val < 1 || val > 100) {
+                tip.innerText = "请输入1到100之间有效的数字！";
+                tip.style.color = "red";
+                return;
+            }
+            guessCount++;
+            countDom.innerText = guessCount;
+            tip.style.color = "#333";
+
+            if (val > targetNum) {
+                tip.innerText = "猜大啦！试试更小的数字";
+            } else if (val < targetNum) {
+                tip.innerText = "猜小啦！试试更大的数字";
+            } else {
+                tip.innerText = `恭喜你猜对啦！答案就是${targetNum}，一共猜了${guessCount}次！`;
+                tip.style.color = "#229954";
+                submitBtn.disabled = true; // 猜对后禁止继续提交
+            }
+            input.value = "";
+        }
+
+        // 重新开局
+        resetBtn.onclick = function() {
+            targetNum = Math.floor(Math.random() * 100) + 1;
+            guessCount = 0;
+            countDom.innerText = 0;
+            tip.innerText = "系统已经生成1-100之间数字，快来猜猜吧！";
+            tip.style.color = "#333";
+            submitBtn.disabled = false;
+            input.value = "";
+        }
+    </script>
+</body>
+</html>
