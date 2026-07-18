@@ -16,6 +16,15 @@
             font-family: "KaiTi", "楷体", serif;
             overflow: hidden;
         }
+        /* 左上角用户名栏 */
+        .user-label {
+            position: fixed;
+            top: 12px;
+            left: 16px;
+            font-size: 20px;
+            color: #000;
+            z-index: 10;
+        }
         /* 账号登录注册面板（最先显示） */
         .account-box {
             width: 100%;
@@ -116,6 +125,8 @@
             font-size: 60px;
             color: #fff;
             font-family: "KaiTi",楷体;
+        }
+        .char {
             opacity: 0;
         }
         /* 工作室主界面 */
@@ -208,10 +219,9 @@
             85% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -120px); }
         }
-        @keyframes textShow {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 1; }
+        @keyframes charShow {
+            from {opacity:0;transform: translateY(10px);}
+            to {opacity:1;transform: translateY(0);}
         }
         @keyframes maskFadeOut {
             from { opacity: 1; }
@@ -220,6 +230,9 @@
     </style>
 </head>
 <body>
+    <!-- 左上角用户名显示 -->
+    <div class="user-label" id="userLabel"></div>
+
     <!-- 账号注册登录面板 第一层 -->
     <div class="account-box" id="accountPanel">
         <div class="acc-title">SKIBIDI工作室账号系统</div>
@@ -241,7 +254,7 @@
 
     <!-- 黑屏过渡遮罩 -->
     <div class="blackMask" id="maskLayer">
-        <div class="mask-text">欢迎回家</div>
+        <div class="mask-text" id="maskTextWrap"></div>
     </div>
 
     <!-- 工作室主页面 -->
@@ -265,26 +278,24 @@
     <script>
         // 全局配置
         const correctAnswer = "郯城";
-        const signReward = 10; //每日签到10ST币
+        const signReward = 10;
         const nowDate = new Date().toLocaleDateString();
 
         // DOM元素
-        //账号面板
+        const userLabel = document.getElementById("userLabel");
         const accountPanel = document.getElementById("accountPanel");
         const userName = document.getElementById("userName");
         const userPwd = document.getElementById("userPwd");
         const regBtn = document.getElementById("regBtn");
         const loginBtn = document.getElementById("loginBtn");
         const accTip = document.getElementById("accTip");
-        //答题面板
         const loginScreen = document.getElementById("loginScreen");
         const workSpace = document.getElementById("workSpace");
         const maskLayer = document.getElementById("maskLayer");
-        const maskText = document.querySelector(".mask-text");
+        const maskTextWrap = document.getElementById("maskTextWrap");
         const answerInput = document.getElementById("answerInput");
         const submitBtn = document.getElementById("submitBtn");
         const wrongTip = document.getElementById("wrongTip");
-        //货币签到
         const stCoinNum = document.getElementById("stCoinNum");
         const dailySign = document.getElementById("dailySign");
         const pageUrl = window.location.href;
@@ -297,7 +308,34 @@
         function saveAccounts(accObj){
             localStorage.setItem("skibidiAccounts", JSON.stringify(accObj));
         }
+        // 记住登录缓存，免重复输密码
+        function setLoginCache(name){
+            localStorage.setItem("skibidiLoginCache", name);
+        }
+        function getLoginCache(){
+            return localStorage.getItem("skibidiLoginCache");
+        }
+        function clearLoginCache(){
+            localStorage.removeItem("skibidiLoginCache");
+        }
         let currentUser = null;
+
+        // 初始化：检测是否已记住登录
+        function initCheckLogin(){
+            let cacheName = getLoginCache();
+            if(!cacheName) return;
+            let allAcc = getAllAccounts();
+            if(allAcc[cacheName]){
+                // 自动登录，跳过账号密码界面
+                currentUser = cacheName;
+                accountPanel.style.display = "none";
+                loginScreen.style.display = "flex";
+                userLabel.innerText = `用户名：${currentUser}`;
+                refreshCoinUI();
+                checkSignStatus();
+            }
+        }
+        initCheckLogin();
 
         // 注册账号
         regBtn.onclick = ()=>{
@@ -312,7 +350,6 @@
                 accTip.innerText="该账号已存在，请直接登录";
                 return;
             }
-            //新账号初始数据
             accounts[name] = {
                 password:pwd,
                 stCoin:0,
@@ -321,7 +358,7 @@
             saveAccounts(accounts);
             accTip.innerText="注册成功，请登录";
         }
-        //登录账号
+        //登录账号，登录后缓存免重复输入密码
         loginBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -335,9 +372,10 @@
                 return;
             }
             currentUser = name;
-            //登录成功，切换到答题页面
+            setLoginCache(name);
             accountPanel.style.display = "none";
             loginScreen.style.display = "flex";
+            userLabel.innerText = `用户名：${currentUser}`;
             refreshCoinUI();
             checkSignStatus();
         }
@@ -347,7 +385,7 @@
             let accounts = getAllAccounts();
             stCoinNum.innerText = accounts[currentUser].stCoin;
         }
-        //检查签到状态（0点刷新）
+        //检查签到状态
         function checkSignStatus(){
             let accounts = getAllAccounts();
             let userData = accounts[currentUser];
@@ -371,18 +409,35 @@
             showFloatMsg(`签到成功，获得${signReward} ST币！`);
         }
 
+        //逐字弹出欢迎文字动画
+        function showWelcomeText(username){
+            maskTextWrap.innerHTML = "";
+            let text = `欢迎回家，${username}`;
+            let delay = 0;
+            for(let char of text){
+                let span = document.createElement("span");
+                span.className = "char";
+                span.innerText = char;
+                span.style.animation = `charShow 0.35s ${delay}s forwards`;
+                maskTextWrap.appendChild(span);
+                delay += 0.35;
+            }
+            return delay;
+        }
+
         //答题开门逻辑
         function checkAnswer() {
             const inputVal = answerInput.value.trim();
             if (inputVal === correctAnswer) {
                 wrongTip.style.opacity = 0;
                 maskLayer.style.display = "flex";
-                maskText.style.animation = "textShow 1.2s forwards";
+                let totalDelay = showWelcomeText(currentUser);
+                // 文字全部显示完，黑屏淡出
                 setTimeout(() => {
                     maskLayer.style.animation = "maskFadeOut 1.5s forwards";
                     loginScreen.style.display = "none";
                     workSpace.style.display = "flex";
-                }, 1800);
+                }, (totalDelay + 1.2) * 1000);
             } else {
                 wrongTip.style.opacity = 1;
                 answerInput.value = "";
