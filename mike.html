@@ -14,8 +14,9 @@
             min-height: 100vh;
             background: #ffffff;
             font-family: "KaiTi", "楷体", serif;
+            overflow: hidden;
         }
-        /* 登录答题界面 */
+        /* 简答题登录界面 */
         .login-box {
             width: 100%;
             height: 100vh;
@@ -34,14 +35,16 @@
             font-size: 22px;
             color: #000;
         }
-        .options-box {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+        #answerInput {
             width: min(300px, 80vw);
+            height: 52px;
+            font-size: 18px;
+            border: 2px solid black;
+            padding: 0 15px;
+            outline: none;
         }
-        .option-btn {
-            width: 100%;
+        #submitBtn {
+            width: min(300px, 80vw);
             height: 52px;
             font-size: 18px;
             border: 2px solid #000;
@@ -50,12 +53,31 @@
             cursor: pointer;
             transition: transform 0.15s;
         }
-        .option-btn:active {
+        #submitBtn:active {
             transform: scale(1.05);
         }
         .error-tip {
             color: red;
             font-size: 18px;
+            opacity: 0;
+        }
+        /* 黑屏过渡遮罩层 */
+        .blackMask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .mask-text {
+            font-size: 60px;
+            color: #fff;
+            font-family: "KaiTi",楷体;
             opacity: 0;
         }
         /* 工作室主界面（默认隐藏） */
@@ -111,19 +133,32 @@
             85% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -120px); }
         }
+        /* 遮罩文字渐显动画 */
+        @keyframes textShow {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+        /* 遮罩缓慢消失动画 */
+        @keyframes maskFadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
     </style>
 </head>
 <body>
-    <!-- 答题验证页面，每次打开都显示 -->
+    <!-- 简答题登录页面 -->
     <div class="login-box" id="loginScreen">
         <div class="login-title">SKIBIDI帝国工作室 准入验证</div>
         <div class="question-text">我们的家在哪？</div>
-        <div class="options-box">
-            <button class="option-btn" data-ans="A">A 大城堡</button>
-            <button class="option-btn" data-ans="B">B 郯城</button>
-            <button class="option-btn" data-ans="C">C 台湾</button>
-        </div>
-        <div class="error-tip" id="wrongTip">答案错误，无法进入工作室，请重新选择</div>
+        <input type="text" id="answerInput" placeholder="在此输入答案">
+        <button id="submitBtn">提交答案</button>
+        <div class="error-tip" id="wrongTip">答案错误，无法进入，请重新输入</div>
+    </div>
+
+    <!-- 黑屏过渡遮罩 -->
+    <div class="blackMask" id="maskLayer">
+        <div class="mask-text">欢迎回家</div>
     </div>
 
     <!-- 工作室主页面（初始隐藏） -->
@@ -138,27 +173,38 @@
     </div>
 
     <script>
-        const correctAnswer = "B"; // 正确答案：郯城
+        const correctAnswer = "郯城";
         const loginScreen = document.getElementById("loginScreen");
         const workSpace = document.getElementById("workSpace");
+        const maskLayer = document.getElementById("maskLayer");
+        const maskText = document.querySelector(".mask-text");
+        const answerInput = document.getElementById("answerInput");
+        const submitBtn = document.getElementById("submitBtn");
         const wrongTip = document.getElementById("wrongTip");
-        const optionBtns = document.querySelectorAll(".option-btn");
         const pageUrl = window.location.href;
 
-        // 选择题点击验证
-        optionBtns.forEach(btn => {
-            btn.onclick = function() {
-                const selectAns = this.getAttribute("data-ans");
-                if (selectAns === correctAnswer) {
-                    // 答对显示主页面
+        // 提交答案逻辑
+        function checkAnswer() {
+            const inputVal = answerInput.value.trim();
+            if (inputVal === correctAnswer) {
+                wrongTip.style.opacity = 0;
+                // 显示黑色遮罩
+                maskLayer.style.display = "flex";
+                maskText.style.animation = "textShow 1.2s forwards";
+                // 等待文字展示完成，再让黑幕慢慢消失
+                setTimeout(() => {
+                    maskLayer.style.animation = "maskFadeOut 1.5s forwards";
                     loginScreen.style.display = "none";
                     workSpace.style.display = "flex";
-                    wrongTip.style.opacity = 0;
-                } else {
-                    // 答错提示错误
-                    wrongTip.style.opacity = 1;
-                }
+                }, 1800);
+            } else {
+                wrongTip.style.opacity = 1;
+                answerInput.value = "";
             }
+        }
+        submitBtn.onclick = checkAnswer;
+        answerInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") checkAnswer();
         })
 
         // 漂浮提示文字函数
