@@ -222,7 +222,7 @@
             to { opacity: 0; }
         }
 
-        /* ========== 新增：反馈弹窗样式 ========== */
+        /* ========== 反馈弹窗样式 ========== */
         .feedback-modal {
             position: fixed;
             width: 100vw;
@@ -266,7 +266,7 @@
             cursor:pointer;
         }
 
-        /* ========== 新增：猜数字游戏页面 渐变背景 ========== */
+        /* ========== 猜数字游戏页面 渐变背景 ========== */
         .guess-game-page {
             width:100%;
             height:100vh;
@@ -313,6 +313,76 @@
             font-size:17px;
             cursor:pointer;
         }
+
+        /* ========== 商店页面样式 新增 ========== */
+        .shop-page {
+            width:100%;
+            height:100vh;
+            display:none;
+            flex-direction:column;
+            align-items:center;
+            padding-top:70px;
+            gap:20px;
+            background: linear-gradient(135deg,#a855f7,#3b82f6);
+            overflow-y:auto;
+            padding-bottom:40px;
+        }
+        .shop-title {
+            font-size:34px;
+            color:#fff;
+        }
+        .shop-back-btn {
+            width: min(200px,70vw);
+            height:48px;
+            border:none;
+            border-radius:8px;
+            background:#fff;
+            font-size:18px;
+            cursor:pointer;
+        }
+        .goods-wrap {
+            width: min(900px,92vw);
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap:24px;
+        }
+        .goods-card {
+            background:#ffffff;
+            border-radius:12px;
+            padding:16px;
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+        }
+        .goods-img {
+            width:100%;
+            height:180px;
+            object-fit:cover;
+            border-radius:8px;
+            border:1px solid #333;
+        }
+        .goods-name {
+            font-size:20px;
+            font-weight:bold;
+        }
+        .goods-desc {
+            font-size:15px;
+            color:#444;
+        }
+        .goods-price {
+            font-size:18px;
+            color:#c28000;
+            font-weight:bold;
+        }
+        .buy-btn {
+            width:100%;
+            height:44px;
+            border:2px solid #000;
+            background:#ffd700;
+            font-size:17px;
+            cursor:pointer;
+            border-radius:6px;
+        }
     </style>
 </head>
 <body>
@@ -352,11 +422,11 @@
             <button class="menu-btn" id="btnHelp">寻求帮助</button>
             <button class="menu-btn" id="btnGuessGame">猜数字</button>
             <button class="menu-btn" id="btnLink">复制链接</button>
-            <button class="menu-btn disabled-btn">待开发</button>
+            <button class="menu-btn" id="btnShop">商店</button>
         </div>
     </div>
 
-    <!-- 新增：反馈弹窗 -->
+    <!-- 反馈弹窗 -->
     <div class="feedback-modal" id="feedModal">
         <div class="feedback-box">
             <div class="feedback-title">提交反馈</div>
@@ -368,7 +438,7 @@
         </div>
     </div>
 
-    <!-- 新增：猜数字游戏页面 -->
+    <!-- 猜数字游戏页面 -->
     <div class="guess-game-page" id="gamePage">
         <h2 class="game-title">猜数字 1~100</h2>
         <div class="game-range" id="rangeText">当前范围：1 ~ 100</div>
@@ -377,6 +447,86 @@
         <div class="game-buttons">
             <button class="game-btn" id="submitGuess">提交猜测</button>
             <button class="game-btn" id="backHome">返回主页</button>
+        </div>
+    </div>
+
+    <!-- 商店页面 新增 -->
+    <div class="shop-page" id="shopPage">
+        <h2 class="shop-title">素材商店</h2>
+        <button class="shop-back-btn" id="shopBackBtn">返回工作室主页</button>
+        <div class="goods-wrap">
+            <!-- 商品1 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/00613200893b403890d41d342d2d3631~tplv-a9rns2rl98-image.image" alt="泰坦音响人握手">
+                <div class="goods-name">泰坦音响人握手原画</div>
+                <div class="goods-desc">Skibidi Toilet官方名场面，两大泰坦握手合作高清壁纸</div>
+                <div class="goods-price">售价：30 ST币</div>
+                <button class="buy-btn" data-price="30">立即购买</button>
+            </div>
+            <!-- 商品2 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/9920f34347944088922f3d3d911d3934~tplv-a9rns2rl98-image.image" alt="皇遁九族剥离之术">
+                <div class="goods-name">皇遁·九族剥离之术表情包</div>
+                <div class="goods-desc">经典清宫搞笑整活表情包，聊天对线专用</div>
+                <div class="goods-price">售价：20 ST币</div>
+                <button class="buy-btn" data-price="20">立即购买</button>
+            </div>
+            <!-- 商品3 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/0d29f01932444018891d0d2233d49229~tplv-a9rns2rl98-image.image" alt="西装摄像机人">
+                <div class="goods-name">西装摄像机人立绘</div>
+                <div class="goods-desc">城市西装摄像机人高清原画，简约商务风格头像</div>
+                <div class="goods-price">售价：25 ST币</div>
+                <button class="buy-btn" data-price="25">立即购买</button>
+            </div>
+            <!-- 商品4 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/044d40f9478440219490f31400090234~tplv-a9rns2rl98-image.image" alt="马桶人原版">
+                <div class="goods-name">初代马桶人原图</div>
+                <div class="goods-desc">Skibidi Toilet初代恐怖马桶人经典素材</div>
+                <div class="goods-price">售价：15 ST币</div>
+                <button class="buy-btn" data-price="15">立即购买</button>
+            </div>
+            <!-- 商品5 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/9d200320943c40089290d4d0d2092902~tplv-a9rns2rl98-image.image" alt="熊大竟敢耍俺">
+                <div class="goods-name">熊大「竟敢耍俺」表情包</div>
+                <div class="goods-desc">熊出没愤怒搞笑表情包，生气对线专用</div>
+                <div class="goods-price">售价：10 ST币</div>
+                <button class="buy-btn" data-price="10">立即购买</button>
+            </div>
+            <!-- 商品6 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/8d390020941440388d2d290d00d99d90~tplv-a9rns2rl98-image.image" alt="熊大邪笑">
+                <div class="goods-name">熊大邪笑表情包</div>
+                <div class="goods-desc">腹黑坏笑熊大，整活调侃专用表情包</div>
+                <div class="goods-price">售价：10 ST币</div>
+                <button class="buy-btn" data-price="10">立即购买</button>
+            </div>
+            <!-- 商品7 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/200d90d443944038900f1d4000d09d93~tplv-a9rns2rl98-image.image" alt="红瞳暗黑少女">
+                <div class="goods-name">红瞳暗黑少女头像</div>
+                <div class="goods-desc">日系暗黑风少女头像，红瞳血色氛围感手绘</div>
+                <div class="goods-price">售价：35 ST币</div>
+                <button class="buy-btn" data-price="35">立即购买</button>
+            </div>
+            <!-- 商品8 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/0f3d00d443944038900f1d4000d09d93~tplv-a9rns2rl98-image.image" alt="狂暴黑白怪物">
+                <div class="goods-name">黑白红狂暴怪物手绘</div>
+                <div class="goods-desc">潦草狂放风格战斗怪物原画，高质感速写素材</div>
+                <div class="goods-price">售价：40 ST币</div>
+                <button class="buy-btn" data-price="40">立即购买</button>
+            </div>
+            <!-- 商品9 -->
+            <div class="goods-card">
+                <img class="goods-img" src="https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9rns2rl98/300d90d443944038900f1d4000d09d93~tplv-a9rns2rl98-image.image" alt="星穹双角色">
+                <div class="goods-name">星穹双角色黑白速写</div>
+                <div class="goods-desc">崩坏星穹铁道双女主战斗速写，黑白水墨画风</div>
+                <div class="goods-price">售价：38 ST币</div>
+                <button class="buy-btn" data-price="38">立即购买</button>
+            </div>
         </div>
     </div>
 
@@ -419,6 +569,12 @@
         const guessInput = document.getElementById("guessInput");
         const submitGuess = document.getElementById("submitGuess");
         const backHome = document.getElementById("backHome");
+
+        // 商店页面元素 新增
+        const btnShop = document.getElementById("btnShop");
+        const shopPage = document.getElementById("shopPage");
+        const shopBackBtn = document.getElementById("shopBackBtn");
+        const buyButtons = document.querySelectorAll(".buy-btn");
 
         let currentUser = null;
         // 猜数字全局变量
@@ -609,10 +765,13 @@
             }
         }
 
-        // ========== 1、寻求帮助反馈弹窗逻辑 ==========
+        // ========== 1、寻求帮助反馈弹窗逻辑（修复点击失效bug） ==========
         btnHelp.onclick = ()=>{
             feedModal.style.display = "flex";
-            feedbackInput.focus(); // 自动唤起输入键盘
+            // 修复：延迟聚焦，确保移动端稳定唤起键盘
+            setTimeout(()=>{
+                feedbackInput.focus();
+            },100);
         }
         feedCancel.onclick = ()=>{
             feedModal.style.display = "none";
@@ -678,6 +837,25 @@
         guessInput.addEventListener("keydown",e=>{
             if(e.key === "Enter") submitGuessNum();
         })
-    </script>
-</body>
-</html>
+
+        // ========== 3、商店页面逻辑 新增 ==========
+        // 打开商店
+        btnShop.onclick = ()=>{
+            workSpace.style.display = "none";
+            shopPage.style.display = "flex";
+        }
+        // 商店返回主页
+        shopBackBtn.onclick = ()=>{
+            shopPage.style.display = "none";
+            workSpace.style.display = "flex";
+        }
+        // 商品购买逻辑
+        buyButtons.forEach(btn=>{
+            btn.onclick = ()=>{
+                const price = Number(btn.dataset.price);
+                const accounts = getAllAccounts();
+                const userData = accounts[currentUser];
+                if(userData.stCoin >= price){
+                    // 余额充足，扣除货币
+                    userData.stCoin -= price;
+                    saveAccounts(accounts);
