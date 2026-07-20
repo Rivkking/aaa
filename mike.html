@@ -582,6 +582,7 @@
         let minRange = 1;
         let maxRange = 100;
 
+        // ============ 账号存储工具函数（修复缓存共用Bug） ============
         function getAllAccounts(){
             let data = localStorage.getItem("skibidiAccounts");
             return data ? JSON.parse(data) : {};
@@ -595,11 +596,15 @@
         function getLoginCache(){
             return localStorage.getItem("skibidiLoginCache");
         }
+        // 修复：每个账号独立存储答题验证标记
         function setPassQuestion(name){
-            localStorage.setItem("skibidiPassQ_" + name, "1");
+            let allPass = JSON.parse(localStorage.getItem("skibidiPassCache") || "{}");
+            allPass[name] = 1;
+            localStorage.setItem("skibidiPassCache", JSON.stringify(allPass));
         }
         function checkUserPassQuestion(name){
-            return localStorage.getItem("skibidiPassQ_" + name) === "1";
+            let allPass = JSON.parse(localStorage.getItem("skibidiPassCache") || "{}");
+            return !!allPass[name];
         }
 
         // 欢迎开幕动画
@@ -627,8 +632,8 @@
                     loginScreen.style.display = "none";
                     workSpace.style.display = "flex";
                     coinWrap.style.display = "flex";
-                    workSpace.offsetHeight;
-                    coinWrap.offsetHeight;
+                    // 强制刷新UI，修复延迟渲染Bug
+                    refreshCoinUI();
                 })
             }, totalTextTime);
         }
@@ -653,12 +658,12 @@
         }
         initCheckLogin();
 
-        // 注册
+        // 注册（修复空格账号Bug，清除首尾空格）
         regBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
             if(!name || !pwd){
-                accTip.innerText="账号和密码不能为空";
+                accTip.innerText="账号和密码不能为空，不能全为空格";
                 return;
             }
             let accounts = getAllAccounts();
@@ -673,9 +678,12 @@
             };
             saveAccounts(accounts);
             accTip.innerText="注册成功，请登录";
+            // 清空输入框
+            userName.value = "";
+            userPwd.value = "";
         }
 
-        // 登录按钮
+        // 登录按钮（清除首尾空格校验）
         loginBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -702,6 +710,7 @@
         }
 
         function refreshCoinUI(){
+            if(!currentUser) return;
             let accounts = getAllAccounts();
             stCoinNum.innerText = accounts[currentUser].stCoin;
         }
@@ -765,10 +774,9 @@
             }
         }
 
-        // ========== 1、寻求帮助反馈弹窗逻辑（修复点击失效bug） ==========
+        // ========== 寻求帮助反馈弹窗逻辑 ==========
         btnHelp.onclick = ()=>{
             feedModal.style.display = "flex";
-            // 修复：延迟聚焦，确保移动端稳定唤起键盘
             setTimeout(()=>{
                 feedbackInput.focus();
             },100);
@@ -783,19 +791,16 @@
             showFloatMsg("感谢您的反馈");
         }
 
-        // ========== 2、猜数字游戏完整逻辑 ==========
-        // 打开猜数字页面，初始化游戏
+        // ========== 猜数字游戏完整逻辑 ==========
         btnGuessGame.onclick = ()=>{
             workSpace.style.display = "none";
             gamePage.style.display = "flex";
             resetGame();
         }
-        // 返回主页
         backHome.onclick = ()=>{
             gamePage.style.display = "none";
             workSpace.style.display = "flex";
         }
-        // 重置游戏，生成新数字，清空记录
         function resetGame(){
             targetNum = Math.floor(Math.random()*100)+1;
             minRange = 1;
@@ -804,14 +809,12 @@
             recordBox.innerHTML = "猜测记录：<br>";
             guessInput.value = "";
         }
-        // 提交猜测
         function submitGuessNum(){
             let val = Number(guessInput.value.trim());
             if(isNaN(val) || val < minRange || val > maxRange){
                 showFloatMsg(`请输入${minRange}到${maxRange}之间有效数字`);
                 return;
             }
-            // 写入记录
             let recordText = "";
             if(val < targetNum){
                 recordText = `你猜：${val}，猜小了，范围更新为${val} ~ ${maxRange}`;
@@ -825,7 +828,6 @@
             recordBox.innerHTML += recordText + "<br>";
             rangeText.innerText = `当前范围：${minRange} ~ ${maxRange}`;
             guessInput.value = "";
-            // 猜对自动重置
             if(val === targetNum){
                 setTimeout(()=>{
                     showFloatMsg("游戏通关，开启新一局");
@@ -838,24 +840,17 @@
             if(e.key === "Enter") submitGuessNum();
         })
 
-        // ========== 3、商店页面逻辑 新增 ==========
-        // 打开商店
+        // ========== 商店页面逻辑（修复扣款后不刷新币数量Bug） ==========
         btnShop.onclick = ()=>{
             workSpace.style.display = "none";
             shopPage.style.display = "flex";
         }
-        // 商店返回主页
         shopBackBtn.onclick = ()=>{
             shopPage.style.display = "none";
             workSpace.style.display = "flex";
         }
-        // 商品购买逻辑
         buyButtons.forEach(btn=>{
             btn.onclick = ()=>{
                 const price = Number(btn.dataset.price);
                 const accounts = getAllAccounts();
-                const userData = accounts[currentUser];
-                if(userData.stCoin >= price){
-                    // 余额充足，扣除货币
-                    userData.stCoin -= price;
-                    saveAccounts(accounts);
+                const userData =
