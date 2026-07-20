@@ -582,7 +582,7 @@
         let minRange = 1;
         let maxRange = 100;
 
-        // ============ 账号存储工具函数（修复缓存共用Bug） ============
+        // ============ 账号存储工具函数 ============
         function getAllAccounts(){
             let data = localStorage.getItem("skibidiAccounts");
             return data ? JSON.parse(data) : {};
@@ -596,7 +596,7 @@
         function getLoginCache(){
             return localStorage.getItem("skibidiLoginCache");
         }
-        // 修复：每个账号独立存储答题验证标记
+        // 每个账号独立存储答题验证标记
         function setPassQuestion(name){
             let allPass = JSON.parse(localStorage.getItem("skibidiPassCache") || "{}");
             allPass[name] = 1;
@@ -632,7 +632,6 @@
                     loginScreen.style.display = "none";
                     workSpace.style.display = "flex";
                     coinWrap.style.display = "flex";
-                    // 强制刷新UI，修复延迟渲染Bug
                     refreshCoinUI();
                 })
             }, totalTextTime);
@@ -658,7 +657,7 @@
         }
         initCheckLogin();
 
-        // 注册（修复空格账号Bug，清除首尾空格）
+        // 注册账号
         regBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -678,12 +677,11 @@
             };
             saveAccounts(accounts);
             accTip.innerText="注册成功，请登录";
-            // 清空输入框
             userName.value = "";
             userPwd.value = "";
         }
 
-        // 登录按钮（清除首尾空格校验）
+        // ========== 核心修复点：登录逻辑重写 ==========
         loginBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -696,15 +694,19 @@
                 accTip.innerText="密码错误";
                 return;
             }
+            // 登录缓存
             currentUser = name;
             setLoginCache(name);
             accountPanel.style.display = "none";
             userLabel.innerText = `用户名：${currentUser}`;
             refreshCoinUI();
             checkSignStatus();
+            // 修复：无论新旧账号，先判断是否答过题，没答强制弹出答题界面
             if(checkUserPassQuestion(currentUser)){
+                // 答过题，直接播放黑屏动画进主页
                 playWelcomeAnimation(currentUser);
             }else{
+                // 新账号/未答题老账号，弹出答题页面，不会直接进工作室
                 loginScreen.style.display = "flex";
             }
         }
@@ -840,7 +842,7 @@
             if(e.key === "Enter") submitGuessNum();
         })
 
-        // ========== 商店页面逻辑（修复扣款后不刷新币数量Bug） ==========
+        // ========== 商店页面逻辑 ==========
         btnShop.onclick = ()=>{
             workSpace.style.display = "none";
             shopPage.style.display = "flex";
@@ -852,5 +854,4 @@
         buyButtons.forEach(btn=>{
             btn.onclick = ()=>{
                 const price = Number(btn.dataset.price);
-                const accounts = getAllAccounts();
-                const userData =
+                const ac
