@@ -50,7 +50,7 @@
             color:#503800;
             font-size:18px;
         }
-        /* 登录注册面板 */
+        /* 密码登录面板 */
         .account-box {
             width: 100%;
             height: 100vh;
@@ -314,7 +314,7 @@
             cursor:pointer;
         }
 
-        /* ========== 商店页面样式 新增 ========== */
+        /* ========== 商店页面样式 ========== */
         .shop-page {
             width:100%;
             height:100vh;
@@ -387,19 +387,18 @@
 </head>
 <body>
     <div class="top-header">
-        <div class="user-label" id="userLabel"></div>
+        <div class="user-label" id="userLabel">玩家</div>
         <div class="coin-bar" id="coinWrap">
             <div class="st-coin">ST</div>
             <span>ST币：<span id="stCoinNum">0</span></span>
         </div>
     </div>
 
+    <!-- 仅密码登录页面，删除账号输入、注册按钮 -->
     <div class="account-box" id="accountPanel">
-        <div class="acc-title">SKIBIDI工作室账号系统</div>
-        <input class="acc-input" id="userName" placeholder="输入账号名">
-        <input class="acc-input" id="userPwd" placeholder="输入密码" type="password">
-        <button class="acc-btn" id="regBtn">注册新账号</button>
-        <button class="acc-btn" id="loginBtn">登录已有账号</button>
+        <div class="acc-title">SKIBIDI工作室密码验证</div>
+        <input class="acc-input" id="userPwd" placeholder="输入登录密码" type="password">
+        <button class="acc-btn" id="loginBtn">登录进入</button>
         <div class="acc-tip" id="accTip"></div>
     </div>
 
@@ -419,7 +418,6 @@
         <h1 class="main-title">SKIBIDI 帝国的工作室</h1>
         <div class="menu-box">
             <button class="menu-btn" id="dailySign">每日签到</button>
-            <button class="menu-btn" id="btnHelp">寻求帮助</button>
             <button class="menu-btn" id="btnGuessGame">猜数字</button>
             <button class="menu-btn" id="btnLink">复制链接</button>
             <button class="menu-btn" id="btnShop">商店</button>
@@ -450,7 +448,7 @@
         </div>
     </div>
 
-    <!-- 商店页面 新增 -->
+    <!-- 商店页面 -->
     <div class="shop-page" id="shopPage">
         <h2 class="shop-title">素材商店</h2>
         <button class="shop-back-btn" id="shopBackBtn">返回工作室主页</button>
@@ -531,18 +529,20 @@
     </div>
 
     <script>
+        // 全局固定配置
         const correctAnswer = "郯城";
         const signReward = 10;
+        const loginPassword = "123456"; // 这里是登录密码，可自行修改
         const nowDate = new Date().toLocaleDateString();
+        const pageUrl = window.location.href;
 
+        // DOM元素
         const userLabel = document.getElementById("userLabel");
         const coinWrap = document.getElementById("coinWrap");
         const stCoinNum = document.getElementById("stCoinNum");
         const dailySign = document.getElementById("dailySign");
         const accountPanel = document.getElementById("accountPanel");
-        const userName = document.getElementById("userName");
         const userPwd = document.getElementById("userPwd");
-        const regBtn = document.getElementById("regBtn");
         const loginBtn = document.getElementById("loginBtn");
         const accTip = document.getElementById("accTip");
         const loginScreen = document.getElementById("loginScreen");
@@ -552,16 +552,14 @@
         const answerInput = document.getElementById("answerInput");
         const submitBtn = document.getElementById("submitBtn");
         const wrongTip = document.getElementById("wrongTip");
-        const pageUrl = window.location.href;
 
-        // 反馈弹窗元素
-        const btnHelp = document.getElementById("btnHelp");
+        // 反馈弹窗
         const feedModal = document.getElementById("feedModal");
         const feedbackInput = document.getElementById("feedbackInput");
         const feedCancel = document.getElementById("feedCancel");
         const feedSubmit = document.getElementById("feedSubmit");
 
-        // 猜数字游戏元素
+        // 猜数字
         const btnGuessGame = document.getElementById("btnGuessGame");
         const gamePage = document.getElementById("gamePage");
         const rangeText = document.getElementById("rangeText");
@@ -570,50 +568,22 @@
         const submitGuess = document.getElementById("submitGuess");
         const backHome = document.getElementById("backHome");
 
-        // 商店页面元素
+        // 商店
         const btnShop = document.getElementById("btnShop");
         const shopPage = document.getElementById("shopPage");
         const shopBackBtn = document.getElementById("shopBackBtn");
         const buyButtons = document.querySelectorAll(".buy-btn");
 
-        let currentUser = null;
-        // 猜数字全局变量
-        let targetNum = 0;
-        let minRange = 1;
-        let maxRange = 100;
+        let stCoin = 0;
+        let lastSignDay = localStorage.getItem("signDay") || "";
 
-        // ============ 账号存储工具函数 ============
-        function getAllAccounts(){
-            let data = localStorage.getItem("skibidiAccounts");
-            return data ? JSON.parse(data) : {};
-        }
-        function saveAccounts(accObj){
-            localStorage.setItem("skibidiAccounts", JSON.stringify(accObj));
-        }
-        function setLoginCache(name){
-            localStorage.setItem("skibidiLoginCache", name);
-        }
-        function getLoginCache(){
-            return localStorage.getItem("skibidiLoginCache");
-        }
-        // 每个账号独立存储答题验证标记
-        function setPassQuestion(name){
-            let allPass = JSON.parse(localStorage.getItem("skibidiPassCache") || "{}");
-            allPass[name] = 1;
-            localStorage.setItem("skibidiPassCache", JSON.stringify(allPass));
-        }
-        function checkUserPassQuestion(name){
-            let allPass = JSON.parse(localStorage.getItem("skibidiPassCache") || "{}");
-            return !!allPass[name];
-        }
-
-        // 欢迎开幕动画
-        function playWelcomeAnimation(username) {
+        // 欢迎黑屏动画
+        function playWelcomeAnimation() {
             maskLayer.style.display = "flex";
             maskLayer.style.opacity = "1";
             maskLayer.style.animation = "none";
             maskTextWrap.innerHTML = "";
-            let text = `欢迎回家，${username}`;
+            let text = `欢迎回家，玩家`;
             let delay = 0;
             for(let char of text){
                 let span = document.createElement("span");
@@ -633,108 +603,31 @@
                     workSpace.style.display = "flex";
                     coinWrap.style.display = "flex";
                     refreshCoinUI();
+                    checkSignStatus();
                 })
             }, totalTextTime);
         }
 
-        // 显示顶部用户信息
-        function showUserInfo() {
-            if(currentUser) {
-                userLabel.innerText = `用户名：${currentUser}`;
-                coinWrap.style.display = "flex";
-                refreshCoinUI();
-            }
-        }
-
-        // 初始化自动登录
-        function initCheckLogin(){
-            let cacheName = getLoginCache();
-            if(!cacheName) return;
-            let allAcc = getAllAccounts();
-            if(allAcc[cacheName]){
-                currentUser = cacheName;
-                accountPanel.style.display = "none";
-                showUserInfo();
-                checkSignStatus();
-                if(checkUserPassQuestion(currentUser)){
-                    playWelcomeAnimation(currentUser);
-                }else{
-                    loginScreen.style.display = "flex";
-                }
-            }
-        }
-        initCheckLogin();
-
-        // 注册账号
-        regBtn.onclick = ()=>{
-            let name = userName.value.trim();
-            let pwd = userPwd.value.trim();
-            if(!name || !pwd){
-                accTip.innerText="账号和密码不能为空，不能全为空格";
-                return;
-            }
-            let accounts = getAllAccounts();
-            if(accounts[name]){
-                accTip.innerText="该账号已存在，请直接登录";
-                return;
-            }
-            accounts[name] = {
-                password:pwd,
-                stCoin:0,
-                lastSignDate:""
-            };
-            saveAccounts(accounts);
-            accTip.innerText="注册成功，请登录";
-            userName.value = "";
-            userPwd.value = "";
-        }
-
-        // 登录逻辑
+        // 密码登录逻辑
         loginBtn.onclick = ()=>{
-            let name = userName.value.trim();
             let pwd = userPwd.value.trim();
-            let accounts = getAllAccounts();
-            if(!accounts[name]){
-                accTip.innerText="账号不存在，请先注册";
-                return;
-            }
-            if(accounts[name].password !== pwd){
-                accTip.innerText="密码错误";
-                return;
-            }
-            // 登录缓存
-            currentUser = name;
-            setLoginCache(name);
-            accountPanel.style.display = "none";
-            showUserInfo();
-            checkSignStatus();
-            // 判断是否答过题
-            if(checkUserPassQuestion(currentUser)){
-                // 答过题，直接播放黑屏动画进主页
-                playWelcomeAnimation(currentUser);
-            }else{
-                // 未答题，弹出答题页面
+            if(pwd === loginPassword){
+                accTip.innerText = "";
+                accountPanel.style.display = "none";
                 loginScreen.style.display = "flex";
-                // 确保主页隐藏
-                workSpace.style.display = "none";
-                // 隐藏硬币栏
-                coinWrap.style.display = "none";
+            }else{
+                accTip.innerText = "密码错误，请重新输入";
             }
         }
 
+        // 更新金币显示
         function refreshCoinUI(){
-            if(!currentUser) return;
-            let accounts = getAllAccounts();
-            if(accounts[currentUser]) {
-                stCoinNum.innerText = accounts[currentUser].stCoin;
-            }
+            stCoinNum.innerText = stCoin;
         }
-        
+
+        // 签到状态
         function checkSignStatus(){
-            let accounts = getAllAccounts();
-            let userData = accounts[currentUser];
-            if(!userData) return;
-            if(userData.lastSignDate === nowDate){
+            if(lastSignDay === nowDate){
                 dailySign.disabled = true;
                 dailySign.innerText = "今日已签到，明天0点重置";
             }else{
@@ -742,14 +635,10 @@
                 dailySign.innerText = "每日签到领取10 ST币";
             }
         }
-        
         dailySign.onclick = ()=>{
-            let accounts = getAllAccounts();
-            let userData = accounts[currentUser];
-            if(!userData) return;
-            userData.stCoin += signReward;
-            userData.lastSignDate = nowDate;
-            saveAccounts(accounts);
+            stCoin += signReward;
+            lastSignDay = nowDate;
+            localStorage.setItem("signDay", lastSignDay);
             refreshCoinUI();
             checkSignStatus();
             showFloatMsg(`签到成功，获得${signReward} ST币！`);
@@ -760,9 +649,7 @@
             const inputVal = answerInput.value.trim();
             if (inputVal === correctAnswer) {
                 wrongTip.style.opacity = 0;
-                setPassQuestion(currentUser);
-                loginScreen.style.display = "none";
-                playWelcomeAnimation(currentUser);
+                playWelcomeAnimation();
             } else {
                 wrongTip.style.opacity = 1;
                 answerInput.value = "";
@@ -773,7 +660,7 @@
             if (e.key === "Enter") checkAnswer();
         })
 
-        // 上浮飘字提示
+        // 上浮提示文字
         function showFloatMsg(text) {
             const oldTip = document.querySelector(".float-notice");
             if (oldTip) oldTip.remove();
@@ -783,7 +670,7 @@
             document.body.appendChild(tipDom);
         }
 
-        // 复制链接按钮
+        // 复制链接
         document.getElementById("btnLink").onclick = async () => {
             try {
                 await navigator.clipboard.writeText(pageUrl);
@@ -793,13 +680,7 @@
             }
         }
 
-        // ========== 寻求帮助反馈弹窗逻辑 ==========
-        btnHelp.onclick = ()=>{
-            feedModal.style.display = "flex";
-            setTimeout(()=>{
-                feedbackInput.focus();
-            },100);
-        }
+        // 反馈弹窗
         feedCancel.onclick = ()=>{
             feedModal.style.display = "none";
             feedbackInput.value = "";
@@ -810,7 +691,10 @@
             showFloatMsg("感谢您的反馈");
         }
 
-        // ========== 猜数字游戏完整逻辑 ==========
+        // 猜数字游戏逻辑
+        let targetNum = 0;
+        let minRange = 1;
+        let maxRange = 100;
         btnGuessGame.onclick = ()=>{
             workSpace.style.display = "none";
             gamePage.style.display = "flex";
@@ -859,6 +743,27 @@
             if(e.key === "Enter") submitGuessNum();
         })
 
-        // ========== 商店页面逻辑 ==========
+        // 商店页面
         btnShop.onclick = ()=>{
-            workSpace.style.d
+            workSpace.style.display = "none";
+            shopPage.style.display = "flex";
+        }
+        shopBackBtn.onclick = ()=>{
+            shopPage.style.display = "none";
+            workSpace.style.display = "flex";
+        }
+        buyButtons.forEach(btn=>{
+            btn.onclick = ()=>{
+                const price = Number(btn.dataset.price);
+                if(stCoin >= price){
+                    stCoin -= price;
+                    refreshCoinUI();
+                    showFloatMsg("购买成功！");
+                }else{
+                    showFloatMsg("ST币不足，无法购买");
+                }
+            }
+        })
+    </script>
+</body>
+</html>
