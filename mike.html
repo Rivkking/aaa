@@ -570,7 +570,7 @@
         const submitGuess = document.getElementById("submitGuess");
         const backHome = document.getElementById("backHome");
 
-        // 商店页面元素 新增
+        // 商店页面元素
         const btnShop = document.getElementById("btnShop");
         const shopPage = document.getElementById("shopPage");
         const shopBackBtn = document.getElementById("shopBackBtn");
@@ -637,6 +637,15 @@
             }, totalTextTime);
         }
 
+        // 显示顶部用户信息
+        function showUserInfo() {
+            if(currentUser) {
+                userLabel.innerText = `用户名：${currentUser}`;
+                coinWrap.style.display = "flex";
+                refreshCoinUI();
+            }
+        }
+
         // 初始化自动登录
         function initCheckLogin(){
             let cacheName = getLoginCache();
@@ -645,8 +654,7 @@
             if(allAcc[cacheName]){
                 currentUser = cacheName;
                 accountPanel.style.display = "none";
-                userLabel.innerText = `用户名：${currentUser}`;
-                refreshCoinUI();
+                showUserInfo();
                 checkSignStatus();
                 if(checkUserPassQuestion(currentUser)){
                     playWelcomeAnimation(currentUser);
@@ -681,7 +689,7 @@
             userPwd.value = "";
         }
 
-        // ========== 核心修复点：登录逻辑重写 ==========
+        // 登录逻辑
         loginBtn.onclick = ()=>{
             let name = userName.value.trim();
             let pwd = userPwd.value.trim();
@@ -698,27 +706,34 @@
             currentUser = name;
             setLoginCache(name);
             accountPanel.style.display = "none";
-            userLabel.innerText = `用户名：${currentUser}`;
-            refreshCoinUI();
+            showUserInfo();
             checkSignStatus();
-            // 修复：无论新旧账号，先判断是否答过题，没答强制弹出答题界面
+            // 判断是否答过题
             if(checkUserPassQuestion(currentUser)){
                 // 答过题，直接播放黑屏动画进主页
                 playWelcomeAnimation(currentUser);
             }else{
-                // 新账号/未答题老账号，弹出答题页面，不会直接进工作室
+                // 未答题，弹出答题页面
                 loginScreen.style.display = "flex";
+                // 确保主页隐藏
+                workSpace.style.display = "none";
+                // 隐藏硬币栏
+                coinWrap.style.display = "none";
             }
         }
 
         function refreshCoinUI(){
             if(!currentUser) return;
             let accounts = getAllAccounts();
-            stCoinNum.innerText = accounts[currentUser].stCoin;
+            if(accounts[currentUser]) {
+                stCoinNum.innerText = accounts[currentUser].stCoin;
+            }
         }
+        
         function checkSignStatus(){
             let accounts = getAllAccounts();
             let userData = accounts[currentUser];
+            if(!userData) return;
             if(userData.lastSignDate === nowDate){
                 dailySign.disabled = true;
                 dailySign.innerText = "今日已签到，明天0点重置";
@@ -727,9 +742,11 @@
                 dailySign.innerText = "每日签到领取10 ST币";
             }
         }
+        
         dailySign.onclick = ()=>{
             let accounts = getAllAccounts();
             let userData = accounts[currentUser];
+            if(!userData) return;
             userData.stCoin += signReward;
             userData.lastSignDate = nowDate;
             saveAccounts(accounts);
@@ -844,14 +861,4 @@
 
         // ========== 商店页面逻辑 ==========
         btnShop.onclick = ()=>{
-            workSpace.style.display = "none";
-            shopPage.style.display = "flex";
-        }
-        shopBackBtn.onclick = ()=>{
-            shopPage.style.display = "none";
-            workSpace.style.display = "flex";
-        }
-        buyButtons.forEach(btn=>{
-            btn.onclick = ()=>{
-                const price = Number(btn.dataset.price);
-                const ac
+            workSpace.style.d
