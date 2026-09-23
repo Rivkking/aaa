@@ -1,0 +1,14 @@
+<html>
+<body style="text-align:center;padding-top:60px;">
+<input id="txt" placeholder="输入内容" style="width:80%;max-width:320px;font-size:18px;padding:6px;">
+<br><br>
+<button onclick="create()">生成二维码</button>
+<div id="box" style="margin-top:20px;"></div>
+<script>
+function create(){
+let text=document.getElementById("txt").value;
+document.getElementById("box").innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(text)}">`;
+}
+</script>
+</body>
+</html>
