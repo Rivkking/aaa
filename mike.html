@@ -1,322 +1,128 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>安装包弹窗 · 纯净版</title>
-    <style>
-        /* 极简重置，只保留最基础的样式 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>五位同学成绩分析报告</title><style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:18px 10px;background:radial-gradient(circle at 15% 10%,#ffe0f0,transparent 40%),radial-gradient(circle at 85% 20%,#d7e9ff,transparent 40%),linear-gradient(160deg,#eef1ff,#fdeff9 50%,#e8fbf6)}
+.phone{width:100%;max-width:430px;background:#f6f8fc;border-radius:44px;box-shadow:0 24px 60px rgba(80,90,140,.28),0 0 0 10px #fff,0 0 0 11px #dfe4ee;position:relative;overflow:hidden;padding-bottom:26px}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:130px;height:26px;background:#1b2440;border-radius:0 0 18px 18px;z-index:5}
+.statusbar{height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 26px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(120deg,#5a4bd6,#8a5cf0 55%,#c15bd8);position:relative;z-index:4}
+.statusbar .ic{letter-spacing:1px}
+.hero{background:linear-gradient(135deg,#5a4bd6,#8a5cf0 55%,#c15bd8);color:#fff;padding:20px 22px 30px;position:relative;overflow:hidden}
+.hero .spark{position:absolute;color:rgba(255,255,255,.35);font-size:18px}
+.hero h1{font-size:22px;line-height:1.35;position:relative;z-index:2;text-shadow:0 2px 8px rgba(0,0,0,.12)}
+.hero .sub{font-size:12px;opacity:.92;margin-top:8px;position:relative;z-index:2}
+.hero .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;position:relative;z-index:2}
+.hero .tags span{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);padding:4px 10px;border-radius:14px;font-size:11px;backdrop-filter:blur(4px)}
+.wave{display:block;width:100%;height:18px;margin-top:-1px}
+.content{padding:4px 16px 0}
+.note{background:linear-gradient(135deg,#fff8e6,#fff2cf);border:1.5px dashed #f0b429;border-radius:16px;padding:14px 15px;font-size:11.5px;color:#7a5c1e;line-height:1.85;box-shadow:0 4px 14px rgba(240,180,41,.12)}
+.note b{color:#c8870a}
+.sec{background:#fff;border-radius:20px;padding:18px 16px;margin-top:16px;box-shadow:0 6px 20px rgba(90,100,150,.09);border:1px solid #eef1f7}
+.sec h2{display:flex;align-items:center;gap:8px;font-size:15.5px;color:#2b2350;margin-bottom:4px}
+.sec h2 .no{width:24px;height:24px;flex:none;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#a56bf0);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(108,92,231,.35)}
+.sec .desc{font-size:10.5px;color:#98a2b3;margin:6px 0 12px;line-height:1.7}
+.divider{height:3px;border-radius:3px;background:linear-gradient(90deg,#6c5ce7,#c15bd8,#ff9a62,transparent);margin:2px 0 12px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th,td{padding:8px 4px;text-align:center;border-bottom:1px solid #f0f2f7}
+th{background:linear-gradient(180deg,#f3f0ff,#eef2ff);color:#5a4bd6;font-size:10px;font-weight:800;white-space:nowrap}
+td.nm{font-weight:800;color:#2b2350;white-space:nowrap}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+.scroll::-webkit-scrollbar{height:5px}.scroll::-webkit-scrollbar-thumb{background:#d7d9e6;border-radius:5px}
+.medal{font-size:13px}
+.rk{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:8px;font-weight:800;color:#fff;font-size:11px;padding:0 5px}
+.r1{background:linear-gradient(135deg,#ffb800,#ff8a00)}.r2{background:linear-gradient(135deg,#b8c0cc,#8e98a8)}.r3{background:linear-gradient(135deg,#e0955b,#c4763c)}.rn{background:#dfe4ee;color:#6b7688}
+.chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:#fff}
+.scroll-tip{font-size:9.5px;color:#b0b8c6;text-align:center;margin-top:6px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.stat{border-radius:16px;padding:14px;color:#fff;position:relative;overflow:hidden}
+.stat .t{font-size:11px;opacity:.9}.stat .v{font-size:24px;font-weight:800;margin:3px 0}.stat .w{font-size:10px;opacity:.9}
+.stat .deco{position:absolute;right:-8px;bottom:-12px;font-size:54px;opacity:.18}
+.g1{background:linear-gradient(135deg,#ff7a59,#ffab6b)}.g2{background:linear-gradient(135deg,#26c6a6,#5ee0c4)}.g3{background:linear-gradient(135deg,#f0a500,#ffd166)}.g4{background:linear-gradient(135deg,#4666e5,#6fa8ff)}
+.pill{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,#faf8ff,#f3efff);border-radius:12px;padding:9px 12px;margin-top:7px;font-size:11.5px;border:1px solid #eee9ff}
+.pill .who{font-weight:800;color:#5a4bd6}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 12px;margin-top:10px;font-size:10.5px;color:#5b6580}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:-1px}
+.radar{width:100%;height:auto;display:block}
+.pcard{border-radius:18px;padding:14px;margin-top:14px;position:relative;overflow:hidden;border:1px solid #eef1f7;background:linear-gradient(180deg,#fff,#fbfcff)}
+.pcard .top{display:flex;align-items:center;gap:8px}
+.pcard .avatar{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px}
+.pcard .nm{font-size:14px;font-weight:800;color:#2b2350}
+.pcard .bd{font-size:10px;color:#7a8496;margin-top:1px}
+.pcard .medals{margin-left:auto;font-size:10px;color:#8a93a4;text-align:right;line-height:1.5}
+.pcard .radar{margin:6px auto 2px;max-width:300px}
+.pcard .kv{font-size:10.5px;color:#59647a;background:#f5f7fb;border-radius:10px;padding:8px 10px;margin-top:4px;line-height:1.7}
+.pcard .an{font-size:11px;color:#4a5568;margin-top:9px;line-height:1.75}
+.pcard .an b{color:#c0471f}
+.pcard .tip{font-size:10.5px;color:#0f8a6a;margin-top:6px;background:#eafaf4;border-radius:8px;padding:6px 9px}
+ul.pts{margin:4px 0 0 2px;list-style:none}
+ul.pts li{font-size:11.5px;color:#4a5568;line-height:1.75;padding:8px 10px 8px 30px;position:relative;border-radius:10px;margin-bottom:7px;background:linear-gradient(90deg,#faf8ff,#fff)}
+ul.pts li::before{content:"✦";position:absolute;left:10px;top:8px;color:#8a5cf0}
+ul.pts li b{color:#5a4bd6}
+.homebar{width:120px;height:5px;background:#c9cede;border-radius:5px;margin:20px auto 0}
+.foot{text-align:center;font-size:9.5px;color:#aab2c0;margin-top:14px}
+@media(max-width:360px){.content{padding:4px 10px 0}.sec{padding:14px 11px}}
+</style></head><body>
+<div class="phone">
+ <div class="notch"></div>
+ <div class="statusbar"><span>18:03</span><span class="ic">▮▮▮ ⌁ 🔋 100%</span></div>
+ <div class="hero">
+   <span class="spark" style="top:16px;left:16px">✦</span><span class="spark" style="top:70px;right:24px">✧</span><span class="spark" style="top:40px;right:80px">⭐</span>
+   <h1>📊 五位同学<br>成绩分析报告 ✨</h1>
+   <div class="sub">8.3班期中考试成绩（10.11）· 潘杨帆 / 杜若汐 / 黄兰茜 / 赵恩成 / 赵添文</div>
+   <div class="tags"><span>🏫 全校排名口径</span><span>📚 8 科</span><span>👥 5 人</span><span>🎯 100分制视图</span></div>
+ </div>
+ <svg class="wave" viewBox="0 0 430 18" preserveAspectRatio="none"><path d="M0,0 Q215,18 430,0 L430,18 L0,18 Z" fill="#f6f8fc"/></svg>
+ <div class="content">
 
-        body {
-            background: #f2f4f8;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
+  <div class="note">📌 <b>统计口径</b>：① 五科/八科排名均为<b>全校排名</b>，所有榜单按名次<b>先高后低</b>排列；② 100分制换算——道法、历史、生物、地理为50分制×<b>2</b>，物理为70分制<b>÷0.7</b>，均换算为100分制用于单科统计与雷达图，<b>总分仍用原值</b>；③ 五科=语数英物道，八科=全部8科；④ 雷达图虚线轮廓为各科5人最高分参考。</div>
 
-        /* 遮罩层：半透明黑色，覆盖全屏，点击遮罩可关闭（同时弹窗本身阻止冒泡） */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.45);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            z-index: 1000;
-            /* 淡入效果 */
-            animation: overlayFadeIn 0.2s ease-out;
-        }
+  <div class="sec"><h2><span class="no">1</span>🏅 成绩总览</h2><div class="divider"></div>
+   <div class="desc">单科列均为100分制视图（小科×2、物理÷0.7），五科/八科总分用原值。按八科全校排名从高到低。</div>
+   <div class="scroll"><table><thead><tr><th>学生</th><th>语文</th><th>数学</th><th>英语</th><th>物理<br>÷0.7</th><th>道法<br>×2</th><th>生物<br>×2</th><th>历史<br>×2</th><th>地理<br>×2</th><th>五科<br>总分</th><th>五科<br>全校排名</th><th>八科<br>总分</th><th>八科<br>全校排名</th></tr></thead><tbody><tr><td class="nm">赵添文</td><td>106</td><td>102</td><td>104</td><td>92</td><td>91</td><td>84</td><td>75</td><td>89</td><td><b>421.9</b></td><td><span class="rk rn">4</span></td><td><b>545.9</b></td><td><span class="rk rn">4</span></td></tr><tr><td class="nm">杜若汐</td><td>93.5</td><td>111</td><td>102.5</td><td>95</td><td>93</td><td>91</td><td>76</td><td>79</td><td><b>420</b></td><td><span class="rk rn">6</span></td><td><b>543</b></td><td><span class="rk rn">5</span></td></tr><tr><td class="nm">赵恩成</td><td>96.5</td><td>98</td><td>106.5</td><td>96</td><td>89</td><td>83</td><td>80</td><td>90</td><td><b>412.7</b></td><td><span class="rk rn">8</span></td><td><b>539.2</b></td><td><span class="rk rn">7</span></td></tr><tr><td class="nm">黄兰茜</td><td>93</td><td>102</td><td>114.5</td><td>85</td><td>85</td><td>88</td><td>71</td><td>86</td><td><b>411.5</b></td><td><span class="rk rn">9</span></td><td><b>534</b></td><td><span class="rk rn">8</span></td></tr><tr><td class="nm">潘杨帆</td><td>95.5</td><td>110</td><td>109.5</td><td>90</td><td>92</td><td>82</td><td>49</td><td>69</td><td><b>424</b></td><td><span class="rk r1">1</span></td><td><b>524</b></td><td><span class="rk rn">12</span></td></tr></tbody></table></div><div class="scroll-tip">← 左右滑动查看完整表格 →</div>
+  </div>
 
-        @keyframes overlayFadeIn {
-            from { background: rgba(0, 0, 0, 0); }
-            to { background: rgba(0, 0, 0, 0.45); }
-        }
+  <div class="sec"><h2><span class="no">2</span>🥇 全校排名榜（先高后低）</h2><div class="divider"></div>
+   <div class="desc">🏆 八科全校排名</div><div class="pill"><span>🔹 <span class="who">赵添文</span></span><span>第 4 名 · 545.9分 <span class="rk rn">4</span></span></div><div class="pill"><span>🔹 <span class="who">杜若汐</span></span><span>第 5 名 · 543分 <span class="rk rn">5</span></span></div><div class="pill"><span>🔹 <span class="who">赵恩成</span></span><span>第 7 名 · 539.2分 <span class="rk rn">7</span></span></div><div class="pill"><span>🔹 <span class="who">黄兰茜</span></span><span>第 8 名 · 534分 <span class="rk rn">8</span></span></div><div class="pill"><span>🔹 <span class="who">潘杨帆</span></span><span>第 12 名 · 524分 <span class="rk rn">12</span></span></div>
+   <div class="desc" style="margin-top:12px">🎖️ 五科全校排名</div><div class="pill"><span>🥇 <span class="who">潘杨帆</span></span><span>第 1 名 · 424分 <span class="rk r1">1</span></span></div><div class="pill"><span>🔹 <span class="who">赵添文</span></span><span>第 4 名 · 421.9分 <span class="rk rn">4</span></span></div><div class="pill"><span>🔹 <span class="who">杜若汐</span></span><span>第 6 名 · 420分 <span class="rk rn">6</span></span></div><div class="pill"><span>🔹 <span class="who">赵恩成</span></span><span>第 8 名 · 412.7分 <span class="rk rn">8</span></span></div><div class="pill"><span>🔹 <span class="who">黄兰茜</span></span><span>第 9 名 · 411.5分 <span class="rk rn">9</span></span></div>
+  </div>
 
-        /* 弹窗卡片：干净的白底、圆角、阴影 */
-        .modal {
-            background: #ffffff;
-            width: 100%;
-            max-width: 400px;
-            border-radius: 28px;
-            padding: 28px 24px 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16), 0 8px 20px rgba(0, 0, 0, 0.08);
-            /* 轻微弹入动画 */
-            animation: modalPopIn 0.25s cubic-bezier(0.18, 1.0, 0.4, 1.0);
-            /* 防止内部点击关闭冒泡到遮罩（已在JS处理，但这里加一道保险） */
-            cursor: default;
-        }
+  <div class="sec"><h2><span class="no">3</span>🎯 单科最高分</h2><div class="divider"></div>
+   <div class="desc">小科×2、物理÷0.7换算为100分制；按分数从高到低口径统计。</div><div class="scroll"><table><thead><tr><th>科目（100分制）</th><th>🎯 最高分</th><th>保持者</th></tr></thead><tbody><tr><td class="nm">语文</td><td><b style="color:#e0562f;font-size:13px">106</b></td><td>赵添文</td></tr><tr><td class="nm">数学</td><td><b style="color:#e0562f;font-size:13px">111</b></td><td>杜若汐</td></tr><tr><td class="nm">英语</td><td><b style="color:#e0562f;font-size:13px">114.5</b></td><td>黄兰茜</td></tr><tr><td class="nm">物理（÷0.7）</td><td><b style="color:#e0562f;font-size:13px">96</b></td><td>赵恩成</td></tr><tr><td class="nm">道法（×2）</td><td><b style="color:#e0562f;font-size:13px">93</b></td><td>杜若汐</td></tr><tr><td class="nm">生物（×2）</td><td><b style="color:#e0562f;font-size:13px">91</b></td><td>杜若汐</td></tr><tr><td class="nm">历史（×2）</td><td><b style="color:#e0562f;font-size:13px">80</b></td><td>赵恩成</td></tr><tr><td class="nm">地理（×2）</td><td><b style="color:#e0562f;font-size:13px">90</b></td><td>赵恩成</td></tr></tbody></table></div>
+  </div>
 
-        @keyframes modalPopIn {
-            0% { opacity: 0; transform: scale(0.92); }
-            100% { opacity: 1; transform: scale(1); }
-        }
+  <div class="sec"><h2><span class="no">4</span>📉 单科最低分与分差</h2><div class="divider"></div>
+   <div class="desc">分差 = 该科最高分 − 最低分；小科×2、物理÷0.7后的100分制数值。</div><div class="scroll"><table><thead><tr><th>科目</th><th>📉 最低分</th><th>最高分</th><th>分差</th><th>最低分保持者</th></tr></thead><tbody><tr><td class="nm">语文</td><td><b style="color:#2f86e0">93</b></td><td>106</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">13</span></td><td>黄兰茜</td></tr><tr><td class="nm">数学</td><td><b style="color:#2f86e0">98</b></td><td>111</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">13</span></td><td>赵恩成</td></tr><tr><td class="nm">英语</td><td><b style="color:#2f86e0">102.5</b></td><td>114.5</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">12</span></td><td>杜若汐</td></tr><tr><td class="nm">物理（÷0.7）</td><td><b style="color:#2f86e0">85</b></td><td>96</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">11</span></td><td>黄兰茜</td></tr><tr><td class="nm">道法（×2）</td><td><b style="color:#2f86e0">85</b></td><td>93</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">8</span></td><td>黄兰茜</td></tr><tr><td class="nm">生物（×2）</td><td><b style="color:#2f86e0">82</b></td><td>91</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">9</span></td><td>潘杨帆</td></tr><tr><td class="nm">历史（×2）</td><td><b style="color:#2f86e0">49</b></td><td>80</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">31</span></td><td>潘杨帆</td></tr><tr><td class="nm">地理（×2）</td><td><b style="color:#2f86e0">69</b></td><td>90</td><td><span class="chip" style="background:linear-gradient(135deg,#ff7a59,#ffab6b)">21</span></td><td>潘杨帆</td></tr></tbody></table></div>
+  </div>
 
-        /* 标题 */
-        .modal-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #111827;
-            letter-spacing: -0.01em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
+  <div class="sec"><h2><span class="no">5</span>📊 五科 / 八科 汇总</h2><div class="divider"></div>
+   <div class="big">
+    <div class="stat g1"><div class="t">五科最高分</div><div class="v">424</div><div class="w">潘杨帆</div><div class="deco">🏆</div></div>
+    <div class="stat g2"><div class="t">五科平均分</div><div class="v">418.02</div><div class="w">5人平均（原值）</div><div class="deco">📈</div></div>
+    <div class="stat g3"><div class="t">八科最高分</div><div class="v">545.9</div><div class="w">赵添文</div><div class="deco">⭐</div></div>
+    <div class="stat g4"><div class="t">八科平均分</div><div class="v">537.22</div><div class="w">5人平均（原值）</div><div class="deco">🎯</div></div>
+   </div>
+   <div class="desc" style="margin-top:12px">五科最低 411.5 ｜ 八科最低 524；均以原始总分计。</div>
+  </div>
 
-        /* 图标（用emoji/文字模拟“安装包”感觉，不做额外图片请求） */
-        .icon {
-            font-size: 30px;
-            line-height: 1;
-        }
+  <div class="sec"><h2><span class="no">6</span>🥈 每科名次明细</h2><div class="divider"></div>
+   <div class="desc">5人小组内名次，1=该科最高。基于换算后的100分制分数排序（线性换算不改变名次）。</div><div class="scroll"><table><thead><tr><th>学生</th></tr><th>语文</th><th>数学</th><th>英语</th><th>物理</th><th>道法</th><th>生物</th><th>历史</th><th>地理</th></thead><tbody><tr><td class="nm">赵添文</td><td>1</td><td>3</td><td>4</td><td>3</td><td>3</td><td>3</td><td>3</td><td>2</td></tr><tr><td class="nm">杜若汐</td><td>4</td><td>1</td><td>5</td><td>2</td><td>1</td><td>1</td><td>2</td><td>4</td></tr><tr><td class="nm">赵恩成</td><td>2</td><td>5</td><td>3</td><td>1</td><td>4</td><td>4</td><td>1</td><td>1</td></tr><tr><td class="nm">黄兰茜</td><td>5</td><td>3</td><td>1</td><td>5</td><td>5</td><td>2</td><td>4</td><td>3</td></tr><tr><td class="nm">潘杨帆</td><td>3</td><td>2</td><td>2</td><td>4</td><td>2</td><td>5</td><td>5</td><td>5</td></tr></tbody></table></div><div class="scroll-tip">名次：1=该科5人内最高（先高后低）</div>
+  </div>
 
-        /* 安装包文件信息区域 */
-        .file-info {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 18px 16px;
-            margin: 14px 0 24px;
-            border: 1px solid #e9eef3;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
+  <div class="sec"><h2><span class="no">7</span>🕸️ 五人八边形对比</h2><div class="divider"></div>
+   <div class="desc">同一坐标系对比8科结构；小科×2、物理÷0.7，均换算为100分制。</div>
+   <div style="text-align:center"><svg viewBox="0 0 460 460" xmlns="http://www.w3.org/2000/svg" class="radar"><polygon points="230.0,206.0 251.2,214.8 260.0,236.0 251.2,257.2 230.0,266.0 208.8,257.2 200.0,236.0 208.8,214.8" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="230.0,176.0 272.4,193.6 290.0,236.0 272.4,278.4 230.0,296.0 187.6,278.4 170.0,236.0 187.6,193.6" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="230.0,146.0 293.6,172.4 320.0,236.0 293.6,299.6 230.0,326.0 166.4,299.6 140.0,236.0 166.4,172.4" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="230.0,116.0 314.9,151.1 350.0,236.0 314.9,320.9 230.0,356.0 145.1,320.9 110.0,236.0 145.1,151.1" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="230.0,86.0 336.1,129.9 380.0,236.0 336.1,342.1 230.0,386.0 123.9,342.1 80.0,236.0 123.9,129.9" fill="none" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="230.0" y2="86.0" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="336.1" y2="129.9" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="380.0" y2="236.0" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="336.1" y2="342.1" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="230.0" y2="386.0" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="123.9" y2="342.1" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="80.0" y2="236.0" stroke="#dfe6f0" stroke-width="1"/><line x1="230.0" y1="236.0" x2="123.9" y2="129.9" stroke="#dfe6f0" stroke-width="1"/><text x="225.0" y="209.0" font-size="8" fill="#b9c4d2" text-anchor="end">24</text><text x="225.0" y="179.0" font-size="8" fill="#b9c4d2" text-anchor="end">48</text><text x="225.0" y="149.0" font-size="8" fill="#b9c4d2" text-anchor="end">72</text><text x="225.0" y="119.0" font-size="8" fill="#b9c4d2" text-anchor="end">96</text><text x="225.0" y="89.0" font-size="8" fill="#b9c4d2" text-anchor="end">120</text><polygon points="230.0,103.5 328.1,137.9 373.1,236.0 314.9,320.9 230.0,352.2 149.6,316.4 130.0,236.0 150.5,156.5" fill="none" stroke="#b9c4d2" stroke-width="1.4" stroke-dasharray="5 4"/><polygon points="230.0,116.6 327.2,138.8 366.9,236.0 309.5,315.5 230.0,351.0 157.5,308.5 168.8,236.0 169.0,175.0" fill="#ff6b6b" fill-opacity="0.07" stroke="#ff6b6b" stroke-width="2.4" stroke-linejoin="round"/><circle cx="230.0" cy="116.6" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><circle cx="327.2" cy="138.8" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><circle cx="366.9" cy="236.0" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><circle cx="309.5" cy="315.5" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><circle cx="230.0" cy="351.0" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><circle cx="157.5" cy="308.5" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><circle cx="168.8" cy="236.0" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><circle cx="169.0" cy="175.0" r="3.2" fill="#fff" stroke="#ff6b6b" stroke-width="2"/><polygon points="230.0,119.1 328.1,137.9 358.1,236.0 314.0,320.0 230.0,352.2 149.6,316.4 135.0,236.0 160.2,166.2" fill="#26c6a6" fill-opacity="0.07" stroke="#26c6a6" stroke-width="2.4" stroke-linejoin="round"/><circle cx="230.0" cy="119.1" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><circle cx="328.1" cy="137.9" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><circle cx="358.1" cy="236.0" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><circle cx="314.0" cy="320.0" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><circle cx="230.0" cy="352.2" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><circle cx="149.6" cy="316.4" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><circle cx="135.0" cy="236.0" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><circle cx="160.2" cy="166.2" r="3.2" fill="#fff" stroke="#26c6a6" stroke-width="2"/><polygon points="230.0,119.8 320.2,145.8 373.1,236.0 305.1,311.1 230.0,342.2 152.2,313.8 141.2,236.0 154.0,160.0" fill="#a06bd6" fill-opacity="0.07" stroke="#a06bd6" stroke-width="2.4" stroke-linejoin="round"/><circle cx="230.0" cy="119.8" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><circle cx="320.2" cy="145.8" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><circle cx="373.1" cy="236.0" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><circle cx="305.1" cy="311.1" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><circle cx="230.0" cy="342.2" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><circle cx="152.2" cy="313.8" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><circle cx="141.2" cy="236.0" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><circle cx="154.0" cy="160.0" r="3.2" fill="#fff" stroke="#a06bd6" stroke-width="2"/><polygon points="230.0,115.4 316.6,149.4 363.1,236.0 314.9,320.9 230.0,347.2 156.6,309.4 130.0,236.0 150.5,156.5" fill="#2f86e0" fill-opacity="0.07" stroke="#2f86e0" stroke-width="2.4" stroke-linejoin="round"/><circle cx="230.0" cy="115.4" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><circle cx="316.6" cy="149.4" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><circle cx="363.1" cy="236.0" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><circle cx="314.9" cy="320.9" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><circle cx="230.0" cy="347.2" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><circle cx="156.6" cy="309.4" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><circle cx="130.0" cy="236.0" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><circle cx="150.5" cy="156.5" r="3.2" fill="#fff" stroke="#2f86e0" stroke-width="2"/><polygon points="230.0,103.5 320.2,145.8 360.0,236.0 311.3,317.3 230.0,349.8 155.8,310.2 136.2,236.0 151.3,157.3" fill="#f0a500" fill-opacity="0.07" stroke="#f0a500" stroke-width="2.4" stroke-linejoin="round"/><circle cx="230.0" cy="103.5" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><circle cx="320.2" cy="145.8" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><circle cx="360.0" cy="236.0" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><circle cx="311.3" cy="317.3" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><circle cx="230.0" cy="349.8" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><circle cx="155.8" cy="310.2" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><circle cx="136.2" cy="236.0" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><circle cx="151.3" cy="157.3" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="230.0" y="90.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">语文</text><text x="336.1" y="133.9" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">数学</text><text x="380.0" y="240.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">英语</text><text x="336.1" y="346.1" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">物理</text><text x="230.0" y="390.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">道法</text><text x="123.9" y="346.1" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">生物</text><text x="80.0" y="240.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">历史</text><text x="123.9" y="133.9" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">地理</text></svg><div class="legend"><span><i style="background:#ff6b6b"></i>潘杨帆</span><span><i style="background:#26c6a6"></i>杜若汐</span><span><i style="background:#a06bd6"></i>黄兰茜</span><span><i style="background:#2f86e0"></i>赵恩成</span><span><i style="background:#f0a500"></i>赵添文</span></div></div>
+  </div>
 
-        .file-icon {
-            background: #ffffff;
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-            border: 1px solid #eef2f6;
-        }
-
-        .file-detail {
-            flex: 1;
-        }
-
-        .file-name {
-            font-weight: 600;
-            font-size: 16px;
-            color: #1e293b;
-            word-break: break-all;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .file-size {
-            font-size: 13px;
-            color: #64748b;
-            background: #eef2f6;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-weight: 400;
-            display: inline-block;
-            margin-top: 6px;
-        }
-
-        /* 版本/额外描述 */
-        .file-meta {
-            font-size: 13px;
-            color: #5e6f8d;
-            margin-top: 8px;
-            padding-left: 2px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        /* 按钮区域 */
-        .actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        /* 所有按钮基础样式 */
-        .btn {
-            border: none;
-            font-family: inherit;
-            font-weight: 500;
-            font-size: 15px;
-            padding: 12px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffffff;
-            color: #1e293b;
-            border: 1px solid #d0d9e4;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            flex: 1;
-        }
-
-        .btn:hover {
-            background: #f9fcff;
-            border-color: #b9c8da;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-            background: #edf2f9;
-        }
-
-        /* 主按钮：下载 / 安装 */
-        .btn-primary {
-            background: #1e63e9;
-            border: 1px solid #1e63e9;
-            color: #ffffff;
-            box-shadow: 0 6px 14px rgba(30, 99, 233, 0.25);
-        }
-
-        .btn-primary:hover {
-            background: #1552c4;
-            border-color: #1552c4;
-            box-shadow: 0 8px 18px rgba(30, 99, 233, 0.35);
-        }
-
-        .btn-primary:active {
-            background: #0f43a0;
-            border-color: #0f43a0;
-            transform: scale(0.97);
-        }
-
-        /* 小的关闭叉号 - 放在右上角，但也保留底部关闭，更符合直觉 (但还是保留底部关闭按钮) */
-        /* 为了简洁，不添加额外的右上角叉号，用底部取消/关闭。 */
-        /* 如果想加点微妙细节，给弹窗一个相对定位，但不需要 */
-
-        /* 让内容可自适应小屏 */
-        @media (max-width: 420px) {
-            .modal {
-                padding: 24px 18px 18px;
-                border-radius: 24px;
-            }
-            .file-info {
-                padding: 14px 12px;
-            }
-            .btn {
-                padding: 12px 12px;
-                font-size: 14px;
-            }
-            .modal-title {
-                font-size: 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- 弹窗遮罩 + 弹窗本体 -->
-    <div class="overlay" id="installOverlay">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <div class="modal-title" id="modalTitle">
-                <span class="icon">📦</span> 安装包就绪
-            </div>
-
-            <!-- 文件信息区域 -->
-            <div class="file-info">
-                <div class="file-icon">⬇️</div>
-                <div class="file-detail">
-                    <div class="file-name">
-                        Demo_Application_v3.2.1.apk
-                        <span style="font-size: 12px; background: #d9e6ff; color: #1e63e9; padding: 2px 8px; border-radius: 20px; font-weight: 500;">稳定版</span>
-                    </div>
-                    <div class="file-size">📁 24.6 MB</div>
-                    <div class="file-meta">
-                        <span>📅 2025-04-12</span>
-                        <span>🔒 官方签名</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 按钮组 -->
-            <div class="actions">
-                <button class="btn" id="closeBtn">关闭</button>
-                <button class="btn btn-primary" id="downloadBtn">下载安装包</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        (function() {
-            // 获取元素
-            const overlay = document.getElementById('installOverlay');
-            const closeBtn = document.getElementById('closeBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
-
-            // 点击“关闭”按钮 —— 关闭弹窗
-            closeBtn.addEventListener('click', function() {
-                // 移除弹窗：直接隐藏遮罩
-                overlay.style.display = 'none';
-                // 可选：如果希望更彻底可以重置为显示，但一般隐藏即可
-                // 这里保持简单：直接隐藏
-            });
-
-            // 点击“下载安装包”按钮 —— 模拟下载，并关闭弹窗
-            downloadBtn.addEventListener('click', function() {
-                // 真实场景可能是 window.location.href = '下载链接' 或者触发下载
-                // 此处仅模拟，并给出下载反馈
-                // 用alert太粗糙，用console模拟，但保持用户无感知
-                console.log('开始下载: Demo_Application_v3.2.1.apk (24.6 MB)');
-                
-                // 可以尝试触发一次真实的下载提示（但不会真的下载文件，只做演示）
-                // 创建一个虚拟链接触发下载（内容为空或一个说明），这样用户能感受到“下载”行为
-                // 但题目要求“内容很单纯，就只是一个弹窗弹出来一个安装包的”，不需要真正下载文件，所以可以用轻提示
-                // 我们使用一个轻量的模拟：稍微改变按钮文字，2秒后关闭弹窗
-                downloadBtn.textContent = '准备下载...';
-                downloadBtn.disabled = true;
-                downloadBtn.style.opacity = '0.8';
-                downloadBtn.style.cursor = 'default';
-
-                // 为了用户体验，不是禁用所有交互，只是避免重复点击，稍后关闭
-                setTimeout(() => {
-                    // 弹窗关闭 (用户已经点击下载，关闭弹窗)
-                    overlay.style.display = 'none';
-                    // 如果不希望用户再次看到，可以用 display none；如果需要可重置状态，但页面不会刷新，所以不用重置按钮
-                    // 但为了演示，也可以将按钮重置（不过弹窗已经不可见，重置也无妨）
-                    // 但是如果用户想重新看到弹窗，刷新页面即可。 
-                    // 这里我们也在控制台提示下载完成。
-                    console.log('下载任务已触发 (模拟)');
-                }, 800); // 短暂等待，让用户感受到点击反馈
-            });
-
-            // 点击遮罩层（overlay）本身关闭弹窗，但点击弹窗内部不关闭
-            overlay.addEventListener('click', function(event) {
-                // 如果点击的目标是 overlay 本身（即遮罩背景），则关闭弹窗
-                if (event.target === overlay) {
-                    overlay.style.display = 'none';
-                }
-            });
-
-            // 防止点击弹窗内部时触发 overlay 的点击事件（上面已经通过target判断，但为了严谨再加一层）
-            // 其实 target 判断已经足够，但不用额外操作了。不过如果点击的是modal里面的元素，event.target不会是overlay。
-            // 所以已经很安全。
-
-            // 可选：按 Esc 键关闭弹窗（增加一点可用性）
-            window.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && overlay.style.display !== 'none') {
-                    overlay.style.display = 'none';
-                }
-            });
-
-            // 注意: 初始状态overlay是显示状态，display默认为flex
-            // 确保如果用户刷新，弹窗再次出现，没有任何问题。
-        })();
-    </script>
-</body>
-</html>
+  <div class="sec"><h2><span class="no">8</span>🔷 个人八边形图与点评</h2><div class="divider"></div>
+   <div class="desc">顶点数字为换算后的100分制分数；按八科全校排名从高到低排列。</div>
+   <div class="pcard">
+      <div class="top"><div class="avatar" style="background:linear-gradient(135deg,#f0a500,#ffd166)">赵</div>
+        <div><div class="nm">赵添文</div><div class="bd">五科 421.9分·全校第4 ｜ 八科 545.9分·全校第4</div></div>
+        <div class="medals">八科均68.24<br>五科均84.38</div></div>
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="radar"><polygon points="200.0,180.8 217.8,188.2 225.2,206.0 217.8,223.8 200.0,231.2 182.2,223.8 174.8,206.0 182.2,188.2" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="200.0,155.6 235.6,170.4 250.4,206.0 235.6,241.6 200.0,256.4 164.4,241.6 149.6,206.0 164.4,170.4" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="200.0,130.4 253.5,152.5 275.6,206.0 253.5,259.5 200.0,281.6 146.5,259.5 124.4,206.0 146.5,152.5" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="200.0,105.2 271.3,134.7 300.8,206.0 271.3,277.3 200.0,306.8 128.7,277.3 99.2,206.0 128.7,134.7" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="200.0,80.0 289.1,116.9 326.0,206.0 289.1,295.1 200.0,332.0 110.9,295.1 74.0,206.0 110.9,116.9" fill="none" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="200.0" y2="80.0" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="289.1" y2="116.9" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="326.0" y2="206.0" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="289.1" y2="295.1" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="200.0" y2="332.0" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="110.9" y2="295.1" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="74.0" y2="206.0" stroke="#dfe6f0" stroke-width="1"/><line x1="200.0" y1="206.0" x2="110.9" y2="116.9" stroke="#dfe6f0" stroke-width="1"/><text x="195.0" y="183.8" font-size="8" fill="#b9c4d2" text-anchor="end">24</text><text x="195.0" y="158.6" font-size="8" fill="#b9c4d2" text-anchor="end">48</text><text x="195.0" y="133.4" font-size="8" fill="#b9c4d2" text-anchor="end">72</text><text x="195.0" y="108.2" font-size="8" fill="#b9c4d2" text-anchor="end">96</text><text x="195.0" y="83.0" font-size="8" fill="#b9c4d2" text-anchor="end">120</text><polygon points="200.0,94.7 282.4,123.6 320.2,206.0 271.3,277.3 200.0,303.6 132.4,273.6 116.0,206.0 133.2,139.2" fill="none" stroke="#b9c4d2" stroke-width="1.4" stroke-dasharray="5 4"/><polygon points="200.0,94.7 275.7,130.3 309.2,206.0 268.3,274.3 200.0,301.6 137.6,268.4 121.2,206.0 133.9,139.9" fill="#f0a500" fill-opacity="0.24" stroke="#f0a500" stroke-width="2.4" stroke-linejoin="round"/><circle cx="200.0" cy="94.7" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="200.0" y="112.2" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">106</text><circle cx="275.7" cy="130.3" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="265.8" y="143.7" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">102</text><circle cx="309.2" cy="206.0" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="295.2" y="209.5" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">104</text><circle cx="268.3" cy="274.3" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="258.4" y="267.9" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">92</text><circle cx="200.0" cy="301.6" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="200.0" y="291.1" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">91</text><circle cx="137.6" cy="268.4" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="147.5" y="262.0" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">84</text><circle cx="121.2" cy="206.0" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="135.2" y="209.5" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">75</text><circle cx="133.9" cy="139.9" r="3.2" fill="#fff" stroke="#f0a500" stroke-width="2"/><text x="143.8" y="153.3" font-size="11" font-weight="800" fill="#f0a500" text-anchor="middle" stroke="#ffffff" stroke-width="3" paint-order="stroke">89</text><text x="200.0" y="84.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">语文</text><text x="289.1" y="120.9" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">数学</text><text x="326.0" y="210.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">英语</text><text x="289.1" y="299.1" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">物理</text><text x="200.0" y="336.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">道法</text><text x="110.9" y="299.1" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">生物</text><text x="74.0" y="210.0" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">历史</text><text x="110.9" y="120.9" font-size="13" font-weight="700" fill="#3a4a63" text-anchor="middle">地理</text></svg>
+      <div class="kv">📐 单科(100分制)：语文106 数学102 英语104 物理92｜道法91 生物84 历史75 地理89</div>
+      <div class="an"><b>🏆 综合最强 · 均衡无短板</b><br>八科总分 545.9 为5人最高、全校排名第4，五科全校排名第4。语文106为单科最高，8科无短板，是最均衡的一位。</div>
+      <div class="tip">💡 保持均衡，冲击单科更高分。</div>
+    </div><div class="pcard">
+      <div class="top"><div class="avatar" style="background:linear-gradient(135deg,#26c6a6,#5ee0c4)">杜</div>
+        <div><div class="nm">杜若汐</div><div class="bd">五科 420分·全校第6 ｜ 八科 543分·全校第5</div></div>
+        <div class="medals">八科均67.88<br>五科均84</div></div>
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="radar"><polygon points="200.0,180.8 217.8,188.2 225.2,206.0 217.8,223.8 200.0,231.2 182.2,223.8 174.8,206.0 182.2,188.2" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="200.0,155.6 235.6,170.4 250.4,206.0 235.6,241.6 200.0,256.4 164.4,241.6 149.6,206.0 164.4,170.4" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygon points="200.0,130.4 253.5,152.5 275.6,206.0 253.5,259.5 200.0,281.6 146.5,259.5 124.4,206.0 146.5,152.5" fill="none" stroke="#dfe6f0" stroke-width="1"/><polygo
